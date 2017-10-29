@@ -13,7 +13,7 @@ use \Exception;
 /**
  * DataSet
  */
-class DataSet implements DataSetInterface
+class DataSet
 {
     /**
      * Version
@@ -21,58 +21,26 @@ class DataSet implements DataSetInterface
     const VERSION = '0.1.5';
 
     /**
-     * Reference of a \Dida\Db\Db instance.
-     *
-     * @var \Dida\Db\Db
-     */
-    protected $db = null;
-
-    /**
-     * PDOStatement instance.
+     * 存储的PDOStatement实例。
      *
      * @var \PDOStatement
      */
     public $pdoStatement = null;
 
-    /**
-     * Statement execution result.
-     *
-     * @var boolean
-     */
-    public $success = false;
 
     /**
-     * Statement String.
+     * 类的构造函数。
      *
-     * @var string
-     */
-    public $statement = '';
-
-    /**
-     * Statement parameters.
-     *
-     * @var array
-     */
-    public $parameters = [];
-
-
-    /**
-     * Class construct.
-     *
-     * @param \Dida\Db\Db $db
      * @param \PDOStatement $pdoStatement
-     * @param boolean $success
      */
-    public function __construct(&$db, \PDOStatement $pdoStatement = null, $success = true)
+    public function __construct(\PDOStatement &$pdoStatement = null)
     {
-        $this->db = $db;
         $this->pdoStatement = $pdoStatement;
-        $this->success = $success;
     }
 
 
     /**
-     * Call PDOStatement::setFetchMode()
+     * 低级操作，直接调用PDOStatement的setFetchMode()。
      *
      * bool PDOStatement::setFetchMode ( int $mode )
      * bool PDOStatement::setFetchMode ( int $PDO::FETCH_COLUMN , int $colno )
@@ -85,65 +53,51 @@ class DataSet implements DataSetInterface
      */
     public function setFetchMode()
     {
-        switch (func_num_args()) {
-            case 1:
-            case 2:
-            case 3:
-                call_user_func_array([&$this->pdoStatement, 'setFetchMode'], func_get_args());
-                return $this;
-            default:
-                throw new Exception('Invalid argument number. See PDOStatement::setFetchMode()');
-        }
+        return call_user_func_array([$this->pdoStatement, 'setFetchMode'], func_get_args());
     }
 
 
     /**
-     * Fetches the next row from a result set.
+     * 低级操作，直接调用PDOStatement的fetch()。
+     *
+     * PDOStatement::fetch (int $fetch_style );
+     * PDOStatement::fetch (int $fetch_style, int $cursor_orientation = PDO::FETCH_ORI_NEXT);
+     * PDOStatement::fetch (int $fetch_style, int $cursor_orientation = PDO::FETCH_ORI_NEXT, int $cursor_offset = 0 );
      *
      * @return mixed|false
      */
     public function fetch()
     {
-        if (!$this->success) {
-            return false;
-        }
-
-        return $this->pdoStatement->fetch();
+        return call_user_func_array([$this->pdoStatement, 'fetch'], func_get_args());
     }
 
 
     /**
-     * Returns an array containing all of the result set rows.
+     * 低级操作，直接调用PDOStatement的fetchAll()。
+     *
+     * array PDOStatement::fetchAll(int $fetch_style, mixed $fetch_argument, array $ctor_args = array());
      *
      * @return array|false
      */
     public function fetchAll()
     {
-        if (!$this->success) {
-            return false;
-        }
-
-        return $this->pdoStatement->fetchAll();
+        return call_user_func_array([$this->pdoStatement, 'fetchAll'], func_get_args());
     }
 
 
     /**
-     * Returns the specified column value of the next row.
+     * 返回下一条数据的指定列的数据。
      *
      * @param int $column_number
      */
     public function fetchColumn($column_number = 0)
     {
-        if (!$this->success) {
-            return false;
-        }
-
         return $this->pdoStatement->fetchColumn($column_number);
     }
 
 
     /**
-     * Represents PDOStatement::errorCode()
+     * 返回PDOStatement::errorCode()
      *
      * @return string
      */
@@ -154,7 +108,7 @@ class DataSet implements DataSetInterface
 
 
     /**
-     * Represents PDOStatement::errorInfo()
+     * 返回PDOStatement::errorInfo()
      *
      * @return array
      */
@@ -165,19 +119,10 @@ class DataSet implements DataSetInterface
 
 
     /**
-     * Represents PDO::lastInsertId()
-     * Notice! The type returned is a string!
+     * 获取结果的行数。
      *
-     * @param string $name
-     */
-    public function lastInsertId($name = null)
-    {
-        return $this->db->pdo->lastInsertId($name);
-    }
-
-
-    /**
-     * Represents PDOStatement::rowCount()
+     * 同 PDOStatement::rowCount()，参见PDO文档。
+     * 有些数据可能返回由此语句返回的行数。但这种方式不能保证对所有数据有效，且对于可移植的应用不应依赖于此方式。
      */
     public function rowCount()
     {
@@ -186,7 +131,8 @@ class DataSet implements DataSetInterface
 
 
     /**
-     * Represents PDOStatement::columnCount()
+     * 获取结果的列数。
+     * 同 PDOStatement::columnCount()，参见PDO文档。
      */
     public function columnCount()
     {
@@ -195,7 +141,8 @@ class DataSet implements DataSetInterface
 
 
     /**
-     * Represents PDOStatement::debugDumpParams()
+     * 导出本次查询的参数数据。
+     * 同 PDOStatement::debugDumpParams()，参见PDO文档。
      */
     public function debugDumpParams()
     {
@@ -204,55 +151,42 @@ class DataSet implements DataSetInterface
 
 
     /**
-     * Gets the next row from the dataset.
+     * 获取下一行，对fetch()的一个简单调用。
      *
      * @return array
      */
     public function getRow()
     {
-        if (!$this->success) {
-            return false;
-        }
-
         return $this->pdoStatement->fetch();
     }
 
 
     /**
-     * Gets all rest row from the dataset.
+     * 获取所有行。对fetchAll()的简单调用。
      *
      * @return array(array)
      */
     public function getRows()
     {
-        if (!$this->success) {
-            return false;
-        }
-
         return $this->pdoStatement->fetchAll();
     }
 
 
     /**
-     * Returns all rows of the specified column.
-     * The first column number is 0.
+     * 获取指定列的所有行。
+     *
+     * 可以指定列名或者列序号，其中第一列的序号是0。
      *
      * @param int|string $column
-     *      @@int    column number
-     *      @@string column name
-     * @return array
+     * @return array|false 成功返回数组，失败返回false。
      */
     public function getColumn($column)
     {
-        if (!$this->success) {
-            return false;
-        }
-
         $column_count = $this->pdoStatement->columnCount();
 
-        /* if $column is string */
+        /* 如果是列名 */
         if (is_string($column)) {
-            for ($i=0; $i<$column_count; $i++) {
+            for ($i = 0; $i < $column_count; $i++) {
                 $column_meta = $this->pdoStatement->getColumnMeta($i);
                 if ($column_meta['name'] === $column) {
                     return $this->pdoStatement->fetchAll(PDO::FETCH_COLUMN, $i);
@@ -260,7 +194,7 @@ class DataSet implements DataSetInterface
             }
         }
 
-        /* if $column is int */
+        /* 如果是列序号 */
         if (is_int($column)) {
             if ($column_count > $column) {
                 return $this->pdoStatement->fetchAll(PDO::FETCH_COLUMN, $column);
@@ -269,7 +203,7 @@ class DataSet implements DataSetInterface
             }
         }
 
-        /* invalid $column type */
+        /* 失败 */
         return false;
     }
 }
