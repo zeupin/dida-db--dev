@@ -252,26 +252,6 @@ abstract class Db
 
 
     /**
-     * 直接执行一条sql语句，返回一个结果集
-     *
-     * @param string $statement
-     * @param array $parameters
-     *
-     * @return DataSet
-     */
-    public function execute($statement, array $parameters = [])
-    {
-        try {
-            $stmt = $this->getConn()->prepare($statement);
-            $success = $stmt->execute($parameters);
-            return new DataSet($this, $stmt, $success);
-        } catch (Exception $ex) {
-            return false;
-        }
-    }
-
-
-    /**
      * 创建一个新的SqlQuery实例对象。
      * 对不同的数据库，建议重写对应的逻辑，覆盖掉本方法。
      *
@@ -299,5 +279,112 @@ abstract class Db
         $sql->table($table, $prefix);
 
         return $sql;
+    }
+
+
+    /**
+     * 执行一条DML语句（INSERT/UPDATE/DELETE），返回受影响的行数。
+     *
+     * @param string $statement 表达式
+     * @param array $parameters 参数数组
+     *
+     * @return int|false 成功，返回受影响的记录条数；失败，返回false。
+     */
+    protected function execDML(&$statement, array &$parameters = null)
+    {
+        try {
+            $stmt = $this->getConn()->prepare($statement);
+            if (true === $stmt->execute($parameters)) {
+                return $stmt->rowCount();
+            } else {
+                return false;
+            }
+        } catch (Exception $ex) {
+            return false;
+        }
+    }
+
+
+    /**
+     * 执行一条SELECT语句
+     *
+     * @param string $statement
+     * @param array $parameters
+     *
+     * @return array 成功，返回一个二维数组；失败，返回false。
+     */
+    public function select($statement, array $parameters = null)
+    {
+        try {
+            $stmt = $this->getConn()->prepare($statement);
+            if (true === $stmt->execute($parameters)) {
+                return $stmt->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (Exception $ex) {
+            return false;
+        }
+    }
+
+
+    /**
+     * 执行一条INSERT语句
+     *
+     * @param string $statement 表达式
+     * @param array $parameters 参数数组
+     *
+     * @return int|false 成功，返回成功插入的记录条数；失败，返回false。
+     */
+    public function insert($statement, array $parameters = null)
+    {
+        return $this->execDML($statement, $parameters);
+    }
+
+
+    /**
+     * 执行一条UPDATE语句
+     *
+     * @param string $statement 表达式
+     * @param array $parameters 参数数组
+     *
+     * @return int|false 成功，返回成功更新的记录条数；失败，返回false。
+     */
+    public function update($statement, array $parameters = null)
+    {
+        return $this->execDML($statement, $parameters);
+    }
+
+
+    /**
+     * 执行一条DELETE语句
+     *
+     * @param string $statement 表达式
+     * @param array $parameters 参数数组
+     *
+     * @return int|false 成功，返回成功删除的记录条数；失败，返回false。
+     */
+    public function delete($statement, array $parameters = null)
+    {
+        return $this->execDML($statement, $parameters);
+    }
+
+
+    /**
+     * 执行一条通用SQL语句。
+     *
+     * @param string $statement 表达式
+     * @param array $parameters 参数数组
+     *
+     * @return boolean 执行成功，返回true；失败，返回false。
+     */
+    public function execute($statement, array $parameters = null)
+    {
+        try {
+            $stmt = $this->getConn()->prepare($statement);
+            return $stmt->execute($parameters);
+        } catch (Exception $ex) {
+            return false;
+        }
     }
 }
