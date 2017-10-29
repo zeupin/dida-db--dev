@@ -6,6 +6,9 @@
 
 namespace Dida\Db;
 
+use \PDO;
+use \Exception;
+
 /**
  * Connection
  */
@@ -352,8 +355,8 @@ class Connection
      */
     protected function replacePrefix($statement)
     {
-        $prefix = $this->cfg['prefix'];
-        $swap_prefix = $this->cfg['swap_prefix'];
+        $prefix = $this->cfg['db.prefix'];
+        $swap_prefix = $this->cfg['db.swap_prefix'];
 
         if ($swap_prefix) {
             return str_replace($swap_prefix, $prefix, $statement);
