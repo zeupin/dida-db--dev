@@ -5,4 +5,12 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          stopOnFailure="true">
+  <testsuites>
+    <testsuite name="My Test Suite">
+      <directory></directory>
+      <file>DbTest.php</file>
+      <file>SqlQueryTest.php</file>
+      <exclude>vendor</exclude>
+    </testsuite>
+  </testsuites>
 </phpunit>

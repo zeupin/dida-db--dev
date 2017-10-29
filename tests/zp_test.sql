@@ -4,10 +4,10 @@ CREATE TABLE IF NOT EXISTS `zp_test` (
   `code` varchar(20) NOT NULL,
   `name` varchar(200) NOT NULL,
   `price` float NOT NULL,
-  `modified_at` datetime NOT NULL,
+  `modified_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `zp_test` (`id`, `code`, `name`, `price`, `modified_at`) VALUES
 (1, 'apple', '红富士苹果', 6.8, '2017-10-22 00:00:00'),

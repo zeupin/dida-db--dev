@@ -18,21 +18,7 @@ class DbTest extends TestCase
     {
         parent::__construct($name, $data, $dataName);
 
-        $this->db = new \Dida\Db\Mysql\MysqlDb([
-            'db.dsn'            => 'mysql:host=localhost;port=3306;dbname=zeupin',
-            'db.username'       => 'zeupin',
-            'db.password'       => 'zeupin',
-            'db.options'        => [
-                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_PERSISTENT         => false
-            ],
-            'db.schemainfo_dir' => __DIR__ . '/cache',
-            'db.name'           => 'zeupin',
-            'db.type'           => 'mysql',
-            'db.prefix'         => 'zp_',
-            'db.swap_prefix'    => '###_',
-        ]);
+        $this->db = new \Dida\Db\Mysql\MysqlDb(include(__DIR__ . "/db.config.php"));
     }
 
 
@@ -42,7 +28,7 @@ class DbTest extends TestCase
     public function resetMock($sql_file)
     {
         $sql = file_get_contents($sql_file);
-        $this->db->getConn()->exec($sql);
+        $this->db->getPDO()->exec($sql);
     }
 
 
@@ -58,12 +44,22 @@ class DbTest extends TestCase
 
 
     /**
+     * 这个测试要放到开始做，此时pdoStatement尚未被初始化,值为null
+     */
+    public function test_errorCode_errorInfo()
+    {
+        $this->assertNull($this->db->errorCode());
+        $this->assertNull($this->db->errorInfo());
+    }
+
+
+    /**
      * 测试数据库是否可以连接
      */
     public function testConnectDb()
     {
         $this->db->connect();
-        $this->assertEquals(true, $this->db->isConnected());
+        $this->assertTrue($this->db->isConnected());
     }
 
 
@@ -73,112 +69,77 @@ class DbTest extends TestCase
     public function testDbWorkWell()
     {
         $this->db->connect();
-        $this->assertEquals(true, $this->db->worksWell());
+        $this->assertTrue($this->db->worksWell());
     }
 
 
-    /**
-     * 测试多表表名
-     */
-    public function testMultiTables()
+    public function test_select()
     {
-        $sql = $this->db->table('test as a, test as b', 'zp_');
-        $result = $sql->select()->build();
+        // 没有设置data，应该是失败
+        $result = $this->db->select('SELECT * FROM this_table_not_exists');
+        $this->assertEquals(false, $result);
+
+        $this->resetMock(__DIR__ . '/zp_test.sql');
+
+        $result = $this->db->select('SELECT * FROM zp_test');
+        echo Debug::varDump(__METHOD__, $result);
     }
 
 
-    /**
-     * 测试单表表名
-     */
-    public function testSingleTables()
-    {
-        $sql = $this->db->table('test as t', 'zp_');
-        $result = $sql->select()->build();
-    }
-
-
-    /**
-     * 测试模拟数据能否正常使用
-     */
-    public function testResetMock()
+    public function test_insert()
     {
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
-        $this->db->connect();
-        $sql = $this->db->table('test', 'zp_');
-        $result = $sql->select(["count(*)"])->execute()->getRow();
-        $this->assertEquals(1, $result['id']);
+        // 没有设置data，应该是失败
+        $result = $this->db->insert('INSERT INTO zp_test(code,name,price) VALUES (?,?,?)');
+        $this->assertEquals(false, $result);
+
+        // 正常插入
+        $result = $this->db->insert('INSERT INTO zp_test(id,code,name,price,modified_at) VALUES (?,?,?,?,?)', [
+            5, 'orange', "江西脐橙", 6.8, date("Y-m-d H:i:s")
+        ]);
+        $this->assertEquals('00000', $this->db->errorCode());
+        $this->assertEquals(1, $result);
+        echo Debug::varDump(__METHOD__, $result, $this->db->errorCode(), $this->db->errorInfo(), $this->db->getPDO()->lastInsertId());
+
+        // 测试部分插入
+        $result = $this->db->insert('INSERT INTO zp_test(code,name,price) VALUES (?,?,?)', [
+            uniqid(), "江西脐橙", 6.8
+        ]);
+        $this->assertEquals('00000', $this->db->errorCode());
+        $this->assertEquals(1, $result);
+        echo Debug::varDump(__METHOD__, $result, $this->db->errorCode(), $this->db->errorInfo(), $this->db->getPDO()->lastInsertId());
     }
 
 
-    /**
-     * 测试能够正常build一个简单的数据表表达式
-     */
-    public function test0Table()
-    {
-        $admin = $this->db->table('test')
-            ->build();
-        $expected = <<<EOT
-SELECT
-    *
-FROM
-    zp_test
-EOT;
-        $this->assertEquals($expected, $admin->statement);
-        $this->assertEquals([], $admin->parameters);
-    }
-
-
-    /**
-     * 测试使用 getColumn() 方法时，用列号和列名是否能得到一致的结果
-     */
-    public function test_getColumn()
+    public function test_update()
     {
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
-        $t = $this->db->table('test');
+        // 没有设置data，应该是失败
+        $result = $this->db->update('UPDATE zp_test SET code=? WHERE id=?');
+        $this->assertEquals(false, $result);
 
-        $result1 = $t->getColumn(2);
-        $result2 = $t->getColumn('name');
-
-        // 期望$result1=$result2
-        $this->assertEquals($result1, $result2);
+        // 正常测试
+        $result = $this->db->update('UPDATE zp_test SET code=? WHERE id=?', [uniqid(), 1]);
+        $this->assertEquals('00000', $this->db->errorCode());
+        $this->assertEquals(1, $result);
+        echo Debug::varDump(__METHOD__, $result, $this->db->errorCode(), $this->db->errorInfo());
     }
 
 
-    /**
-     * 测试使用 getColumn() 方法时，用列号和列名是否能得到一致的结果
-     */
-    public function test_getColumn_1()
+    public function test_delete()
     {
-        $this->resetMock(__DIR__ . '/zp_test_truncate.sql');
+        $this->resetMock(__DIR__ . '/zp_test.sql');
 
-        // user是个空表
-        $t = $this->db->table('test');
+        // 没有设置data，应该是失败
+        $result = $this->db->delete('DELETE FROM zp_test WHERE id=?');
+        $this->assertEquals(false, $result);
 
-        $result1 = $t->getColumn(2);
-        $result2 = $t->getColumn('name');
-
-        // 期望$result1=$result2
-        $this->assertEquals($result1, $result2);
-    }
-
-
-    /**
-     * 缓存所有表信息
-     */
-    public function testCacheAllTableInfo()
-    {
-        $this->db->getSchemaInfo()->saveAllTableInfo();
-    }
-
-
-    /**
-     * 读取表信息
-     */
-    public function testReadTableInfo()
-    {
-        $data = $this->db->getSchemaInfo()->readTableInfoFromCache('zp_test');
-        //var_dump($data);
+        // 正常测试
+        $result = $this->db->delete('DELETE FROM zp_test WHERE id=?', [1]);
+        $this->assertEquals('00000', $this->db->errorCode());
+        $this->assertEquals(1, $result);
+        echo Debug::varDump(__METHOD__, $result, $this->db->errorCode(), $this->db->errorInfo());
     }
 }
