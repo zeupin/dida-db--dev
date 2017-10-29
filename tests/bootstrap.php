@@ -9,4 +9,4 @@ require('D:/Projects/github/dida-debug--dev/src/Debug/Debug.php');
 \Dida\Autoloader::init();
 \Dida\Autoloader::addPsr4('Dida\\',  'D:/Projects/github/dida-db--dev/src/Dida');
 
-//require(__DIR__ . '/../../composer/vendor/autoload.php');
+require('D:/Projects/github/composer/vendor/autoload.php');
