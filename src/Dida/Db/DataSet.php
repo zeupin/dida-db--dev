@@ -27,6 +27,13 @@ class DataSet
      */
     public $pdoStatement = null;
 
+    /**
+     * 缓存的列元的信息
+     *
+     * @var array
+     */
+    protected $column_metas = null;
+
 
     /**
      * 类的构造函数。
@@ -97,7 +104,7 @@ class DataSet
 
 
     /**
-     * 返回PDOStatement::errorCode()
+     * 返回 PDOStatement::errorCode()
      *
      * @return string
      */
@@ -108,7 +115,7 @@ class DataSet
 
 
     /**
-     * 返回PDOStatement::errorInfo()
+     * 返回 PDOStatement::errorInfo()
      *
      * @return array
      */
@@ -186,11 +193,11 @@ class DataSet
 
         /* 如果是列名 */
         if (is_string($column)) {
-            for ($i = 0; $i < $column_count; $i++) {
-                $column_meta = $this->pdoStatement->getColumnMeta($i);
-                if ($column_meta['name'] === $column) {
-                    return $this->pdoStatement->fetchAll(PDO::FETCH_COLUMN, $i);
-                }
+            $pos = $this->getColumnPosByName($column);
+            if ($pos === false) {
+                return false;
+            } else {
+                return $this->pdoStatement->fetchAll(PDO::FETCH_COLUMN, $pos);
             }
         }
 
@@ -205,5 +212,51 @@ class DataSet
 
         /* 失败 */
         return false;
+    }
+
+
+    /**
+     * 给出列名，查出找到对应的第一个列序号。
+     *
+     * 注意：SQL同一个列名完全可以对应不同的列号，如“SELECT id,id FROM user”。
+     *
+     * @param string $column_name
+     *
+     * @return int|false 找到返回列序号，没有找到返回false。
+     */
+    public function getColumnPosByName($column_name)
+    {
+        // 如果还没有列元信息，则先获取
+        if ($this->column_metas === null) {
+            $this->cacheColumnMetas();
+        }
+
+        // 返回第一个找到的列号
+        $column_count = count($this->column_metas);
+        for ($i = 0; $i < $column_count; $i++) {
+            $column_meta = $this->column_metas[$i];
+            if ($column_name == $column_meta['name']) {
+                return $i;
+            }
+        }
+
+        // 没有找到的话，返回false
+        return false;
+    }
+
+
+    /**
+     * 缓存列元数组
+     */
+    public function cacheColumnMetas()
+    {
+        $this->column_metas = [];
+
+        $column_count = $this->pdoStatement->columnCount();
+
+        for ($i = 0; $i < $column_count; $i++) {
+            $column_meta = $this->pdoStatement->getColumnMeta($i);
+            $this->column_metas[$i] = $column_meta;
+        }
     }
 }
