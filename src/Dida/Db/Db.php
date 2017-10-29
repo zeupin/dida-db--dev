@@ -51,6 +51,13 @@ abstract class Db
     protected $pdo = null;
 
     /**
+     * PDOStatement实例
+     *
+     * @var \PDOStatement
+     */
+    protected $pdoStatement = null;
+
+    /**
      * 指明数据库类型
      *
      * @var string
@@ -174,7 +181,7 @@ abstract class Db
      *
      * @return \PDO|false
      */
-    public function getConn()
+    public function getPDO()
     {
         if ($this->connect()) {
             return $this->pdo;
@@ -283,23 +290,57 @@ abstract class Db
 
 
     /**
-     * 执行一条DML语句（INSERT/UPDATE/DELETE），返回受影响的行数。
+     * 获取跟上一次语句句柄操作相关的 SQLSTATE 错误码，（一个由5个字母或数字组成的在 ANSI SQL 标准中定义的标识符）。
+     *
+     * @return string|null 成功返回string，失败返回null
+     */
+    public function errorCode()
+    {
+        if ($this->pdoStatement === null) {
+            return null;
+        } else {
+            return $this->pdoStatement->errorCode();
+        }
+    }
+
+
+    /**
+     * 返回一个关于上一次语句句柄执行操作的错误信息的数组。
+     *
+     * 该数组包含下列字段：
+     * 0 SQLSTATE 错误码（一个由5个字母或数字组成的在 ANSI SQL 标准中定义的标识符）。
+     * 1 具体驱动错误码。
+     * 2 具体驱动错误信息。
+     *
+     * @return array
+     */
+    public function errorInfo()
+    {
+        if ($this->pdoStatement === null) {
+            return null;
+        } else {
+            return $this->pdoStatement->errorInfo();
+        }
+    }
+
+
+    /**
+     * 执行一条通用SQL语句。
      *
      * @param string $statement 表达式
      * @param array $parameters 参数数组
      *
-     * @return int|false 成功，返回受影响的记录条数；失败，返回false。
+     * @return boolean 执行成功，返回true；失败，返回false。
      */
-    protected function execDML(&$statement, array &$parameters = null)
+    public function execute($statement, array $parameters = null)
     {
         try {
-            $stmt = $this->getConn()->prepare($statement);
-            if (true === $stmt->execute($parameters)) {
-                return $stmt->rowCount();
-            } else {
-                return false;
-            }
+            $this->pdo = $this->getPDO();
+            $this->pdoStatement = $this->pdo->prepare($statement);
+            $result = $this->pdoStatement->execute($parameters);
+            return $result;
         } catch (Exception $ex) {
+            $this->pdoStatement = null;
             return false;
         }
     }
@@ -315,14 +356,11 @@ abstract class Db
      */
     public function select($statement, array $parameters = null)
     {
-        try {
-            $stmt = $this->getConn()->prepare($statement);
-            if (true === $stmt->execute($parameters)) {
-                return $stmt->fetchAll();
-            } else {
-                return false;
-            }
-        } catch (Exception $ex) {
+        $result = $this->execute($statement, $parameters);
+
+        if ($result) {
+            return $this->pdoStatement->fetchAll();
+        } else {
             return false;
         }
     }
@@ -338,7 +376,13 @@ abstract class Db
      */
     public function insert($statement, array $parameters = null)
     {
-        return $this->execDML($statement, $parameters);
+        $result = $this->execute($statement, $parameters);
+
+        if ($result) {
+            return $this->pdoStatement->rowCount();
+        } else {
+            return false;
+        }
     }
 
 
@@ -352,7 +396,13 @@ abstract class Db
      */
     public function update($statement, array $parameters = null)
     {
-        return $this->execDML($statement, $parameters);
+        $result = $this->execute($statement, $parameters);
+
+        if ($result) {
+            return $this->pdoStatement->rowCount();
+        } else {
+            return false;
+        }
     }
 
 
@@ -366,24 +416,11 @@ abstract class Db
      */
     public function delete($statement, array $parameters = null)
     {
-        return $this->execDML($statement, $parameters);
-    }
+        $result = $this->execute($statement, $parameters);
 
-
-    /**
-     * 执行一条通用SQL语句。
-     *
-     * @param string $statement 表达式
-     * @param array $parameters 参数数组
-     *
-     * @return boolean 执行成功，返回true；失败，返回false。
-     */
-    public function execute($statement, array $parameters = null)
-    {
-        try {
-            $stmt = $this->getConn()->prepare($statement);
-            return $stmt->execute($parameters);
-        } catch (Exception $ex) {
+        if ($result) {
+            return $this->pdoStatement->rowCount();
+        } else {
             return false;
         }
     }
