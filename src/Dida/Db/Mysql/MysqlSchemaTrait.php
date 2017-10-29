@@ -25,7 +25,7 @@ trait MysqlSchemaTrait
      */
     public function exportSchema($schema, $prefix = '')
     {
-        if ($this->pdo === null) {
+        if ($this->_pdo === null) {
             return false;
         }
 

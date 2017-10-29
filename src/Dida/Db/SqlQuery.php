@@ -10,11 +10,6 @@ use \Exception;
 
 /**
  * SQL查询
- *
- * SqlQueryInterface      基本接口
- * SqlSelectInterface     选择集相关的接口
- * SqlUpdateInterface     更新相关的接口
- * SqlExecutionInterface  执行相关的接口
  */
 class SqlQuery
 {
@@ -139,7 +134,7 @@ class SqlQuery
             }
         }
 
-        throw new Exception(sprintf('Method %s::%s does not exist.', __CLASS__, $name));
+        throw new Exception(sprintf('方法不存在 %s::%s', __CLASS__, $name));
     }
 
 
@@ -800,7 +795,7 @@ class SqlQuery
         }
 
         try {
-            $pdoStatement = $this->db->getConn()->prepare($this->statement);
+            $pdoStatement = $this->db->getPDO()->prepare($this->statement);
             $success = $pdoStatement->execute($this->parameters);
             return new DataSet($this->db, $pdoStatement, $success);
         } catch (Exception $ex) {
