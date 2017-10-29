@@ -192,6 +192,15 @@ abstract class Db
 
 
     /**
+     * 返回当前的PDOStatement实例。
+     */
+    public function getPDOStatement()
+    {
+        return $this->pdoStatement;
+    }
+
+
+    /**
      * 连接数据库
      *
      * @return boolean 成功返回true，失败返回false
