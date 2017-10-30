@@ -11,6 +11,9 @@ use \Dida\Debug\Debug;
  */
 class DateSetTest extends TestCase
 {
+    /**
+     * @var \Dida\Db\DataSet
+     */
     public $dataset = null;
 
     /**
@@ -52,24 +55,112 @@ class DateSetTest extends TestCase
     public function test_fetch()
     {
         $this->initData();
-        $record = $this->dataset->fetch();
-        echo Debug::varDump(__METHOD__, $record);
+        $result = $this->dataset->fetch();
+        $this->assertNotFalse($result);
+        echo Debug::varDump(__METHOD__, $result);
     }
 
 
     public function test_fetchAll()
     {
         $this->initData();
-        $records = $this->dataset->fetchAll();
-        $this->assertNotNull($records);
-        echo Debug::varDump(__METHOD__, $records);
+        $result = $this->dataset->fetchAll();
+        $this->assertNotFalse($result);
+        echo Debug::varDump(__METHOD__, $result);
     }
 
 
     public function test_fetchColumn()
     {
         $this->initData();
-        $value1 = $this->dataset->fetchColumn();
-        $this->assertEquals(1, $value1);
+        $result = $this->dataset->fetchColumn();
+        $this->assertNotFalse($result);
+        echo Debug::varDump(__METHOD__, $result);
+    }
+
+
+    public function test_getRow()
+    {
+        $this->initData();
+        $result = $this->dataset->getRow();
+        $this->assertNotFalse($result);
+        echo Debug::varDump(__METHOD__, $result);
+    }
+
+
+    public function test_getRows()
+    {
+        $this->initData();
+        $result = $this->dataset->getRows();
+        $this->assertNotFalse($result);
+        echo Debug::varDump(__METHOD__, $result);
+    }
+
+
+    public function test_getColumn()
+    {
+        $this->initData();
+        $result = $this->dataset->getColumn(0);
+        $this->assertNotFalse($result);
+        echo Debug::varDump(__METHOD__, $result);
+
+        $this->initData();
+        $result = $this->dataset->getColumn('id');
+        $this->assertNotFalse($result);
+        echo Debug::varDump(__METHOD__, $result);
+    }
+
+
+    public function test_getColumnPosByName()
+    {
+        // 列名不存在，返回false
+        $this->initData();
+        $result = $this->dataset->getColumnPosByName('not_exists');
+        $this->assertFalse($result);
+        echo Debug::varDump(__METHOD__, $result);
+    }
+
+
+    public function test_rowCount_columnCount()
+    {
+        $this->initData();
+        $rowCount = $this->dataset->rowCount();
+        $columnCount = $this->dataset->columnCount();
+        $this->assertNotFalse($rowCount);
+        $this->assertNotFalse($columnCount);
+        echo Debug::varDump(__METHOD__, $rowCount, $columnCount);
+    }
+
+
+    public function test_errorCode_errorInfo()
+    {
+        $this->initData();
+        $errorCode = $this->dataset->errorCode();
+        $errorInfo = $this->dataset->errorInfo();
+        $this->assertNotEmpty($errorCode);
+        $this->assertNotEmpty($errorInfo);
+        echo Debug::varDump(__METHOD__, $errorCode, $errorInfo);
+    }
+
+
+    public function test_debugDumpParams()
+    {
+        $this->initData();
+        $result = $this->dataset->debugDumpParams();
+        $this->assertNotFalse($result);
+        echo Debug::varDump(__METHOD__, $result);
+    }
+
+
+    public function test_setFetchMode()
+    {
+        $this->initData();
+        $result = $this->dataset->setFetchMode(PDO::FETCH_BOTH);
+        $this->assertTrue($result);
+
+        // 看看结果
+        $result = $this->dataset->fetchAll();
+        $this->assertNotFalse($result);
+        echo Debug::varDump(__METHOD__, $result);
     }
 }
