@@ -40,7 +40,7 @@ class DataSet
      *
      * @param \PDOStatement $pdoStatement
      */
-    public function __construct(\PDOStatement &$pdoStatement = null)
+    public function __construct(\PDOStatement $pdoStatement = null)
     {
         $this->pdoStatement = $pdoStatement;
     }
@@ -248,7 +248,7 @@ class DataSet
     /**
      * 缓存列元数组
      */
-    public function cacheColumnMetas()
+    protected function cacheColumnMetas()
     {
         $this->column_metas = [];
 
