@@ -69,7 +69,7 @@ class Connection
      *
      * @param array $cfg
      */
-    public function setConfig(array &$cfg)
+    public function setConfig(array $cfg)
     {
         foreach ($this->cfg as $key => $value) {
             if (array_key_exists($key, $cfg)) {
@@ -86,7 +86,7 @@ class Connection
      *
      * @return array
      */
-    public function &getConfig()
+    public function getConfig()
     {
         return $this->cfg;
     }
@@ -177,6 +177,8 @@ class Connection
 
     /**
      * 检查是否已经连接数据库
+     *
+     * @return boolean
      */
     public function isConnected()
     {
@@ -211,6 +213,8 @@ class Connection
 
     /**
      * 断开数据库连接
+     *
+     * @return void
      */
     public function disconnect()
     {

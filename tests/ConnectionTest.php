@@ -19,7 +19,9 @@ class ConnectionTest extends TestCase
      */
     public function __construct()
     {
-        $this->conn = new Dida\Db\Connection(include(__DIR__ . "/db.config.php"));
+        $cfg = include(__DIR__ . "/db.config.php");
+        $this->conn = new Dida\Db\Connection($cfg);
+        $this->conn->setConfig($cfg);
     }
 
 
@@ -30,6 +32,16 @@ class ConnectionTest extends TestCase
     {
         $sql = file_get_contents($sql_file);
         $this->conn->getPDO()->exec($sql);
+    }
+
+
+    public function test_init()
+    {
+        $cfg = include(__DIR__ . "/db.config.php");
+        $this->conn = new Dida\Db\Connection($cfg);
+        $this->conn->setConfig($cfg);
+        $cfgCurrent = $this->conn->getConfig();
+        echo Debug::varDump(__METHOD__, $cfg, $cfgCurrent);
     }
 
 
@@ -145,5 +157,11 @@ class ConnectionTest extends TestCase
         $this->assertEquals('00000', $this->conn->errorCode());
         $this->assertEquals(1, $result);
         echo Debug::varDump(__METHOD__, $result, $this->conn->errorCode(), $this->conn->errorInfo());
+    }
+
+
+    public function test_disconnect()
+    {
+        $this->conn->disconnect();
     }
 }
