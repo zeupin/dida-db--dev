@@ -237,7 +237,7 @@ EOT;
             ':schema' => $schema,
             ':table'  => $table,
         ]);
-        $result = $stmt->fetchAll(PDO::FETCH_COLUMN,0);
+        $result = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
         if ($result) {
             return $result;
         } else {
