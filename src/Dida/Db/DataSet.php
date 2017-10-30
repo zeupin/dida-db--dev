@@ -47,7 +47,7 @@ class DataSet
 
 
     /**
-     * 低级操作，直接调用PDOStatement的setFetchMode()。
+     * 低级操作，直接调用 PDOStatement 的 setFetchMode()。
      *
      * bool PDOStatement::setFetchMode ( int $mode )
      * bool PDOStatement::setFetchMode ( int $PDO::FETCH_COLUMN , int $colno )
@@ -65,7 +65,7 @@ class DataSet
 
 
     /**
-     * 低级操作，直接调用PDOStatement的fetch()。
+     * 低级操作，直接调用 PDOStatement 的 fetch()。
      *
      * PDOStatement::fetch (int $fetch_style );
      * PDOStatement::fetch (int $fetch_style, int $cursor_orientation = PDO::FETCH_ORI_NEXT);
@@ -80,7 +80,7 @@ class DataSet
 
 
     /**
-     * 低级操作，直接调用PDOStatement的fetchAll()。
+     * 低级操作，直接调用 PDOStatement 的 fetchAll()。
      *
      * array PDOStatement::fetchAll(int $fetch_style, mixed $fetch_argument, array $ctor_args = array());
      *
@@ -93,7 +93,7 @@ class DataSet
 
 
     /**
-     * 返回下一条数据的指定列的数据。
+     * 低级操作，直接调用 PDOStatement 的 fetchColumn()。
      *
      * @param int $column_number
      */
@@ -104,7 +104,7 @@ class DataSet
 
 
     /**
-     * 返回 PDOStatement::errorCode()
+     * 低级操作，直接调用 PDOStatement 的 errorCode()。
      *
      * @return string
      */
@@ -115,7 +115,7 @@ class DataSet
 
 
     /**
-     * 返回 PDOStatement::errorInfo()
+     * 低级操作，直接调用 PDOStatement 的 errorInfo()。
      *
      * @return array
      */
@@ -126,9 +126,8 @@ class DataSet
 
 
     /**
-     * 获取结果的行数。
+     * 低级操作，直接调用 PDOStatement 的 rowCount()。
      *
-     * 同 PDOStatement::rowCount()，参见PDO文档。
      * 有些数据可能返回由此语句返回的行数。但这种方式不能保证对所有数据有效，且对于可移植的应用不应依赖于此方式。
      */
     public function rowCount()
@@ -138,8 +137,7 @@ class DataSet
 
 
     /**
-     * 获取结果的列数。
-     * 同 PDOStatement::columnCount()，参见PDO文档。
+     * 低级操作，直接调用 PDOStatement 的 columnCount()。
      */
     public function columnCount()
     {
@@ -148,8 +146,7 @@ class DataSet
 
 
     /**
-     * 导出本次查询的参数数据。
-     * 同 PDOStatement::debugDumpParams()，参见PDO文档。
+     * 低级操作，直接调用 PDOStatement 的 debugDumpParams()。
      */
     public function debugDumpParams()
     {
@@ -158,9 +155,9 @@ class DataSet
 
 
     /**
-     * 获取下一行，对fetch()的一个简单调用。
+     * 获取下一行，对 fetch() 的一个简单调用。
      *
-     * @return array
+     * @return array|false
      */
     public function getRow()
     {
@@ -169,9 +166,9 @@ class DataSet
 
 
     /**
-     * 获取所有行。对fetchAll()的简单调用。
+     * 获取所有行。对 fetchAll() 的简单调用。
      *
-     * @return array(array)
+     * @return array(array)|false
      */
     public function getRows()
     {
