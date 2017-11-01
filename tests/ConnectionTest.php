@@ -89,13 +89,13 @@ class ConnectionTest extends TestCase
     public function test_select()
     {
         // 没有设置data，应该是失败
-        $result = $this->conn->select('SELECT * FROM this_table_not_exists');
+        $result = $this->conn->executeRead('SELECT * FROM this_table_not_exists');
         $this->assertEquals(false, $result);
 
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
-        $result1 = $this->conn->select('SELECT * FROM zp_test');
-        $result2 = $this->conn->select('SELECT * FROM ###_test', [], true);
+        $result1 = $this->conn->executeRead('SELECT * FROM zp_test');
+        $result2 = $this->conn->executeRead('SELECT * FROM ###_test', [], true);
         $this->assertEquals($result1, $result2);
         echo gettype($this->conn->getPDOStatement());
 //        echo Debug::varDump(__METHOD__, $result1, $result2);
@@ -107,11 +107,11 @@ class ConnectionTest extends TestCase
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
         // 没有设置data，应该是失败
-        $result = $this->conn->insert('INSERT INTO zp_test(code,name,price) VALUES (?,?,?)');
+        $result = $this->conn->executeWrite('INSERT INTO zp_test(code,name,price) VALUES (?,?,?)');
         $this->assertEquals(false, $result);
 
         // 正常插入
-        $result = $this->conn->insert('INSERT INTO zp_test(id,code,name,price,modified_at) VALUES (?,?,?,?,?)', [
+        $result = $this->conn->executeWrite('INSERT INTO zp_test(id,code,name,price,modified_at) VALUES (?,?,?,?,?)', [
             5, 'orange', "江西脐橙", 6.8, date("Y-m-d H:i:s")
         ]);
         $this->assertEquals('00000', $this->conn->errorCode());
@@ -119,7 +119,7 @@ class ConnectionTest extends TestCase
         echo Debug::varDump(__METHOD__, $result, $this->conn->errorCode(), $this->conn->errorInfo(), $this->conn->getPDO()->lastInsertId());
 
         // 测试部分插入
-        $result = $this->conn->insert('INSERT INTO zp_test(code,name,price) VALUES (?,?,?)', [
+        $result = $this->conn->executeWrite('INSERT INTO zp_test(code,name,price) VALUES (?,?,?)', [
             uniqid(), "江西脐橙", 6.8
         ]);
         $this->assertEquals('00000', $this->conn->errorCode());
@@ -133,11 +133,11 @@ class ConnectionTest extends TestCase
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
         // 没有设置data，应该是失败
-        $result = $this->conn->update('UPDATE zp_test SET code=? WHERE id=?');
+        $result = $this->conn->executeWrite('UPDATE zp_test SET code=? WHERE id=?');
         $this->assertEquals(false, $result);
 
         // 正常测试
-        $result = $this->conn->update('UPDATE zp_test SET code=? WHERE id=?', [uniqid(), 1]);
+        $result = $this->conn->executeWrite('UPDATE zp_test SET code=? WHERE id=?', [uniqid(), 1]);
         $this->assertEquals('00000', $this->conn->errorCode());
         $this->assertEquals(1, $result);
         echo Debug::varDump(__METHOD__, $result, $this->conn->errorCode(), $this->conn->errorInfo());
@@ -149,11 +149,11 @@ class ConnectionTest extends TestCase
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
         // 没有设置data，应该是失败
-        $result = $this->conn->delete('DELETE FROM zp_test WHERE id=?');
+        $result = $this->conn->executeWrite('DELETE FROM zp_test WHERE id=?');
         $this->assertEquals(false, $result);
 
         // 正常测试
-        $result = $this->conn->delete('DELETE FROM zp_test WHERE id=?', [1]);
+        $result = $this->conn->executeWrite('DELETE FROM zp_test WHERE id=?', [1]);
         $this->assertEquals('00000', $this->conn->errorCode());
         $this->assertEquals(1, $result);
         echo Debug::varDump(__METHOD__, $result, $this->conn->errorCode(), $this->conn->errorInfo());

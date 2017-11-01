@@ -251,7 +251,7 @@ class Connection
 
 
     /**
-     * 执行一条SELECT语句
+     * 执行一条查询类的语句（SELECT），返回数组形式的结果。
      *
      * @param string $statement
      * @param array $parameters 参数数组
@@ -259,7 +259,7 @@ class Connection
      *
      * @return array 成功，返回一个二维数组；失败，返回false。
      */
-    public function select($statement, array $parameters = null, $replace_prefix = false)
+    public function executeRead($statement, array $parameters = null, $replace_prefix = false)
     {
         // 如果需要替换表前缀
         if ($replace_prefix) {
@@ -277,7 +277,7 @@ class Connection
 
 
     /**
-     * 执行一条INSERT语句
+     * 执行一条修改类的语句（INSERT/UPDATE/DELETE)，并返回影响的记录条数。
      *
      * @param string $statement 表达式
      * @param array $parameters 参数数组
@@ -285,59 +285,7 @@ class Connection
      *
      * @return int|false 成功，返回成功插入的记录条数；失败，返回false。
      */
-    public function insert($statement, array $parameters = null, $replace_prefix = false)
-    {
-        // 如果需要替换表前缀
-        if ($replace_prefix) {
-            $statement = $this->replacePrefix($statement);
-        }
-
-        $result = $this->execute($statement, $parameters);
-
-        if ($result) {
-            return $this->pdoStatement->rowCount();
-        } else {
-            return false;
-        }
-    }
-
-
-    /**
-     * 执行一条UPDATE语句
-     *
-     * @param string $statement 表达式
-     * @param array $parameters 参数数组
-     * @param boolean $replace_prefix 是否替换表前缀
-     *
-     * @return int|false 成功，返回成功更新的记录条数；失败，返回false。
-     */
-    public function update($statement, array $parameters = null, $replace_prefix = false)
-    {
-        // 如果需要替换表前缀
-        if ($replace_prefix) {
-            $statement = $this->replacePrefix($statement);
-        }
-
-        $result = $this->execute($statement, $parameters);
-
-        if ($result) {
-            return $this->pdoStatement->rowCount();
-        } else {
-            return false;
-        }
-    }
-
-
-    /**
-     * 执行一条DELETE语句
-     *
-     * @param string $statement 表达式
-     * @param array $parameters 参数数组
-     * @param boolean $replace_prefix 是否替换表前缀
-     *
-     * @return int|false 成功，返回成功删除的记录条数；失败，返回false。
-     */
-    public function delete($statement, array $parameters = null, $replace_prefix = false)
+    public function executeWrite($statement, array $parameters = null, $replace_prefix = false)
     {
         // 如果需要替换表前缀
         if ($replace_prefix) {
