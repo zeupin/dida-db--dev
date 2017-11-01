@@ -23,10 +23,13 @@ class MysqlDb extends \Dida\Db\Db
         // Set the dbtype
         $this->dbtype = 'Mysql';
 
-        // 配置Builder，使用标准的Builder
+        // 配置 Connection
+        $this->connection = new \Dida\Db\Connection($cfg);
+
+        // 配置 Builder，使用标准的 Builder
         $this->builder = new \Dida\Db\Builder($this);
 
-        // 配置SchemaInfo，使用MysqlSchemaInfo
+        // 配置 SchemaInfo，使用 MysqlSchemaInfo
         $this->schemaInfo = new MysqlSchemaInfo($this);
     }
 }

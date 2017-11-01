@@ -4,21 +4,26 @@ use \PHPUnit\Framework\TestCase;
 use \Dida\Debug\Debug;
 
 /**
- * SqlQueryTest
+ * QueryTest
  */
-class SqlQueryTest extends TestCase
+class QueryTest extends TestCase
 {
     public $db = null;
+
+    /**
+     * @var \Dida\Db\Query
+     */
+    public $sqlquery = null;
 
 
     /**
      * 初始化测试环境
      */
-    public function __construct($name = null, array $data = array(), $dataName = '')
+    public function __construct()
     {
-        parent::__construct($name, $data, $dataName);
-
-        $this->db = new \Dida\Db\Mysql\MysqlDb(include(__DIR__ . "/db.config.php"));
+        $cfg = include(__DIR__ . "/db.config.php");
+        $conn = new Dida\Db\Connection($cfg);
+        $this->sqlquery = new Dida\Db\Query($conn);
     }
 
 
@@ -31,6 +36,29 @@ class SqlQueryTest extends TestCase
         $this->db->getPDO()->exec($sql);
     }
 
+
+    public function test_ConditionTree()
+    {
+        $this->sqlquery
+            ->where('id > 3')
+            ->where('id < 6')
+            ->whereGroup([
+                ['a', '=', 1],
+                ['b', '=', 1],
+            ], 'OR', 'price')
+            ->where('price > 8')
+            ->where('price < 10')
+            ->whereGoto('')
+            ->where('age > 100')
+            ->whereMatch(['name' => 'Mary', 'age' => 22])
+            ->where(['c', 'in', [1,2,3,4]])
+
+            ;
+        print_r($this->sqlquery->whereTree);
+        print_r($this->sqlquery->whereTree->build());
+        //echo Debug::varDump(__METHOD__, $this->sqlquery->whereObject);
+        die();
+    }
 
 
     /**
