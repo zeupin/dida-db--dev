@@ -233,7 +233,7 @@ class Builder
         $this->prepare_INSERT();
 
         $STMT = [
-            'INSERT INTO ',
+            "INSERT INTO\n    ",
             'table'  => &$this->ST['table'],
             'record' => &$this->ST['record'],
         ];

@@ -697,6 +697,24 @@ class Query
     }
 
 
+    private function _________________________INSERT()
+    {
+    }
+
+
+    /**
+     * 设置要新增的记录。
+     *
+     * @param array $record
+     */
+    public function record(array $record)
+    {
+        $this->tasklist['record'] = $record;
+
+        return $this;
+    }
+
+
     private function _________________________UPDATE()
     {
     }
@@ -864,10 +882,12 @@ class Query
     /**
      * INSERT
      */
-    public function insert(array $record)
+    public function insert(array $record = null)
     {
         // 数据
-        $this->tasklist['record'] = $record;
+        if (is_array($record)) {
+            $this->record($record);
+        }
 
         // 准备连接
         $conn = $this->db->getConnection();
@@ -875,6 +895,8 @@ class Query
         // 执行
         $this->tasklist['verb'] = 'INSERT';
         $sql = $this->build();
+        $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
+        return $rowsAffected;
     }
 
 

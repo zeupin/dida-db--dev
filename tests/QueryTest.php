@@ -174,6 +174,29 @@ EOT;
 
 
     /**
+     * 测试 select()
+     */
+    public function test_select()
+    {
+        $this->resetMock(__DIR__ . '/zp_test.sql');
+
+        $t = $this->db->table('test');
+        $result = $t->verb('SELECT')->build();
+        print_r($result);
+        $expected = <<<'EOT'
+SELECT
+    *
+FROM
+    zp_test
+EOT;
+        $this->assertEquals($expected, $result['statement']);
+
+        $result = $t->select()->getRows();
+        print_r($result);
+    }
+
+
+    /**
      * 测试 count()
      */
     public function test_count()
@@ -230,5 +253,27 @@ EOT;
 
         $result = $t->delete();
         $this->assertEquals(2, $result);
+    }
+
+
+    /**
+     * 测试 insert()
+     */
+    public function test_insert()
+    {
+        $this->resetMock(__DIR__ . '/zp_test.sql');
+
+        $record = [
+            'code'  => uniqid(),
+            'name'  => '香蕉',
+            'price' => 5.2,
+        ];
+
+        $t = $this->db->table('test');
+        $result = $t->record($record)->verb('INSERT')->build();
+        print_r($result);
+
+        $result = $t->insert();
+        $this->assertEquals(1, $result);
     }
 }
