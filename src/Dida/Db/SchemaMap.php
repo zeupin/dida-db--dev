@@ -65,9 +65,9 @@ abstract class SchemaMap
 
 
     /**
-     * 获取<schema.table>的主键列名
+     * 获取<schema.table>的主键的列名列表
      */
-    abstract public function getPrimaryKey($table, $schema = null);
+    abstract public function getPrimaryKeys($table, $schema = null);
 
 
     /**
@@ -209,9 +209,23 @@ abstract class SchemaMap
             $columns[$column['COLUMN_NAME']] = $column;
         }
 
+        // 处理单一主键和复合主键
+        $primarykeys = $this->getPrimaryKeys($table, $schema);
+        if ($primarykeys) {
+            $pri = null;
+            $multipri = null;
+        } elseif (count($primarykeys) == 1) {
+            $pri = $primarykeys[0];
+            $multipri = null;
+        } elseif (count($primarykeys) > 1) {
+            $pri = null;
+            $multipri = $primarykeys;
+        }
+
         // 要保存的数据
         $data = [
-            'pri'        => $this->getPrimaryKey($table),
+            'pri'        => $pri,
+            'multipri'   => $multipri,
             'uni'        => $this->getUniqueColumns($table),
             'columnlist' => array_keys($columns),
             'columns'    => $columns,

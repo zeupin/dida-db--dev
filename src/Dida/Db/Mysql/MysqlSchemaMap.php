@@ -176,12 +176,13 @@ EOT;
         }
     }
 
+
     /**
-     * 获取<schema.table>的主键列名
+     * 获取<schema.table>的主键的列名列表
      *
      * @return string|null
      */
-    public function getPrimaryKey($table, $schema = null)
+    public function getPrimaryKeys($table, $schema = null)
     {
         if ($schema === null) {
             $schema = $this->schema;
@@ -202,12 +203,8 @@ EOT;
             ':schema' => $schema,
             ':table'  => $table,
         ]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($row) {
-            return $row['COLUMN_NAME'];
-        } else {
-            return null;
-        }
+        $rows = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+        return $rows;
     }
 
 
