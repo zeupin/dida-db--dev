@@ -9,9 +9,9 @@ namespace Dida\Db;
 use \Exception;
 
 /**
- * SchemaInfo
+ * SchemaMap
  */
-abstract class SchemaInfo
+abstract class SchemaMap
 {
     /**
      * @var \Dida\Db\Db
@@ -100,12 +100,12 @@ abstract class SchemaInfo
             $this->prefix = $cfg['db.prefix'];
         }
 
-        // SchemaInfo的缓存目录
-        if (!isset($cfg['db.schemainfo_dir'])) {
-            throw new Exception('db.schemainfo_dir 未配置');
+        // SchemaMap的缓存目录
+        if (!isset($cfg['db.schemamap_dir'])) {
+            throw new Exception('db.schemamap_dir 未配置');
         }
-        if (!$this->setCacheDir($cfg['db.schemainfo_dir'])) {
-            throw new Exception('db.schemainfo_dir 配置有误');
+        if (!$this->setCacheDir($cfg['db.schemamap_dir'])) {
+            throw new Exception('db.schemamap_dir 配置有误');
         }
     }
 

@@ -46,4 +46,25 @@ class ConditionTree
         $this->logic = $logic;
         $this->name = $name;
     }
+
+
+    /**
+     * 生成命名节点的速查字典。
+     *
+     * @param array $dict
+     */
+    public function getNamedDictionary(array &$dict)
+    {
+        // 如果当前节点是命名节点，则登记到速查字典中。
+        if (is_string($this->name)) {
+            $dict[$this->name] = &$this;
+        }
+
+        // 遍历子节点
+        foreach ($this->items as $key => $item) {
+            if ($item instanceof ConditionTree) {
+                $this->items[$key]->getNamedDictionary($dict);
+            }
+        }
+    }
 }

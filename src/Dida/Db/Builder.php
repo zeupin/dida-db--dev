@@ -37,14 +37,14 @@ class Builder
      *
      * @var array
      */
-    protected $globalSchemaInfo = [];
+    protected $globalSchemaMap = [];
 
     /**
      * 临时的数据库的数据表信息。
      * 只在一个build期间存在，build完了就消失了。
      * 每次build的最初，这个值就被初始化做掉了。
      */
-    protected $localSchemaInfo = [];
+    protected $localSchemaMap = [];
 
     /**
      * 任务列表
@@ -180,13 +180,11 @@ class Builder
         $STMT = [
             'INSERT INTO ',
             'table'   => &$this->ST['table'],
-            'columns' => &$this->ST['insert_column_list'],
-            ' VALUES ',
-            'values'  => &$this->ST['insert_values'],
+            'record' => &$this->ST['record'],
         ];
 
         $PARAMS = [
-            'values' => &$this->PA['insert_values'],
+            'record' => &$this->PA['record'],
         ];
 
         return [
@@ -1030,19 +1028,19 @@ class Builder
 
     protected function clause_INSERT()
     {
-        if (!$this->has('insert')) {
+        if (!$this->has('record')) {
             return;
         }
 
-        $record = $this->tasklist['insert'];
+        $record = $this->tasklist['record'];
         $columns = array_keys($record);
         $values = array_values($record);
 
         $columnlist = '(' . implode(', ', $columns) . ')';
         $marklist = $this->util_make_marklist(count($columns), true);
 
-        $this->ST['insert'] = "{$columnlist}\nVALUES\n    {$marklist}";
-        $this->PA['insert'] = $values;
+        $this->ST['record'] = "{$columnlist}\nVALUES\n    {$marklist}";
+        $this->PA['record'] = $values;
     }
 
 
@@ -1261,7 +1259,7 @@ class Builder
 
 
     /**
-     * 登记一个数据表到 $globalSchemaInfo 和 $locaSchemaInfo
+     * 登记一个数据表到 $globalSchemaMap 和 $locaSchemaMap
      *
      * @param string $name
      * @param string $alias
@@ -1271,12 +1269,12 @@ class Builder
         // 实际的表名
         $realname = $this->util_table_with_prefix($name, $prefix);
 
-        // 如果 $globalSchemaInfo 还没有这个数据表的表元数据，则先从读取表元数据
-        if (!array_key_exists($realname, $this->globalSchemaInfo)) {
-            if (!$tableinfo = $this->db->getSchemaInfo()->readTableInfoFromCache($realname)) {
+        // 如果 $globalSchemaMap 还没有这个数据表的表元数据，则先从读取表元数据
+        if (!array_key_exists($realname, $this->globalSchemaMap)) {
+            if (!$tableinfo = $this->db->getSchemaMap()->readTableInfoFromCache($realname)) {
                 throw new Exception("数据表{$realname}的表元信息不存在");
             }
-            $this->globalSchemaInfo[$realname] = $tableinfo;
+            $this->globalSchemaMap[$realname] = $tableinfo;
         }
 
         // 限制$alias只能为字符串或者null
@@ -1285,14 +1283,14 @@ class Builder
         }
 
         // 本地info指向到全局对应的info
-        if (!isset($this->localSchemaInfo[$realname])) {
-            $this->localSchemaInfo[$realname] = &$this->globalSchemaInfo[$realname];
+        if (!isset($this->localSchemaMap[$realname])) {
+            $this->localSchemaMap[$realname] = &$this->globalSchemaMap[$realname];
         }
 
         // 本地alias的info也指向到全局对应的info
         if ($alias) {
-            if (!isset($this->localSchemaInfo[$alias])) {
-                $this->localSchemaInfo[$alias] = &$this->globalSchemaInfo[$realname];
+            if (!isset($this->localSchemaMap[$alias])) {
+                $this->localSchemaMap[$alias] = &$this->globalSchemaMap[$realname];
             }
         }
     }

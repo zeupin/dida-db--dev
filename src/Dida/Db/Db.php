@@ -30,9 +30,9 @@ class Db
     protected $builder = null;
 
     /**
-     * @var \Dida\Db\SchemaInfo
+     * @var \Dida\Db\SchemaMap
      */
-    protected $schemaInfo = null;
+    protected $schemamap = null;
 
 
     /**
@@ -73,13 +73,13 @@ class Db
 
 
     /**
-     * 获取的SchemaInfo实例
+     * 获取的SchemaMap实例
      *
-     * @return \Dida\Db\SchemaInfo
+     * @return \Dida\Db\SchemaMap
      */
-    public function &getSchemaInfo()
+    public function &getSchemaMap()
     {
-        return $this->schemaInfo;
+        return $this->schemamap;
     }
 
 

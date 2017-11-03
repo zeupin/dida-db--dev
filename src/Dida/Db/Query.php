@@ -19,48 +19,30 @@ class Query
     const VERSION = '0.1.5';
 
     /**
-     * @var \Dida\Db\Db
+     * @var \Dida\Db\Connection
      */
-    protected $db = null;
+    protected $conn = null;
 
     /**
+     * Builder 实例。
+     *
      * @var \Dida\Db\Builder
      */
     protected $builder = null;
 
     /**
-     * @var boolean
-     */
-    public $built = false;
-
-    /**
-     * The result of $this->build()
+     * SchemaMap 实例。
      *
-     * @var boolean
+     * @var \Dida\Db\SchemaMap
      */
-    public $build_ok = false;
+    protected $schemamap = null;
 
     /**
-     * Enable/Disable pull-execution
-     *
-     * @see __call()
-     * @var boolean
-     */
-    protected $pullexec = true;
-
-    /**
-     * SQL statement
-     *
-     * @var string
-     */
-    public $statement = null;
-
-    /**
-     * SQL parameters
+     * 任务清单
      *
      * @var array
      */
-    public $parameters = null;
+    protected $tasklist = [];
 
     /**
      * @var array
@@ -70,11 +52,6 @@ class Query
         'prefix'      => '',
         'swap_prefix' => '###_',
     ];
-
-    /**
-     * @var \Dida\Db\ConditionTree
-     */
-    public $whereTree = null;
 
     /**
      * 指向当前的 whereTree 节点。
@@ -87,14 +64,9 @@ class Query
     /**
      * 所有命名节点的列表。
      *
-     * @var type
+     * @var array
      */
     protected $whereDict = [];
-
-    /**
-     * @var \Dida\Db\ConditionTree
-     */
-    public $havingTree = null;
 
     /**
      * 指向当前的 havingTree 节点。
@@ -107,16 +79,9 @@ class Query
     /**
      * 所有命名节点的列表。
      *
-     * @var type
-     */
-    protected $havingDict = [];
-
-    /**
-     * 任务清单
-     *
      * @var array
      */
-    protected $tasklist = [];
+    protected $havingDict = [];
 
 
     /**
@@ -141,6 +106,11 @@ class Query
     }
 
 
+    private function _________________________INIT()
+    {
+    }
+
+
     /**
      * 重置任务列表为空
      *
@@ -158,148 +128,67 @@ class Query
 
 
     /**
-     * 如果检查到 tasklist 中的某个数组类型的键不存在，就先创建一个。
-     *
-     * @param type $name
+     * 设置当前的 Builder 实例。
      */
-    protected function initArray($name)
+    public function setBuilder($builder)
     {
-        if (!isset($this->tasklist[$name])) {
-            $this->tasklist[$name] = [];
-        }
+        $this->builder = $builder;
+        return $this;
     }
 
 
     /**
-     * Implicit calling the methods in the DataSet class.
-     *
-     * @param string $name
-     * @param array $arguments
-     * @return mixed
-     * @throws Exception
+     * 返回当前的 Builder 实例。
      */
-    public function __call($name, $arguments)
+    public function getBuilder()
     {
-        // Pull-Execution feature
-        if ($this->pullexec) {
-            if (method_exists('\Dida\Db\DataSet', $name)) {
-                $result = $this->execute();
-                return call_user_func_array([$result, $name], $arguments);
-            }
-        }
-
-        throw new Exception(sprintf('方法不存在 %s::%s', __CLASS__, $name));
+        return $this->builder;
     }
 
 
     /**
-     * 导出当前的tasklist
-     *
-     * @return array
+     * 设置当前的 SchemaMap 实例。
      */
-    public function exportTaskList()
+    public function setSchemeMap($schemamap)
     {
-        return $this->tasklist;
-    }
-
-
-    /**
-     * 导入一个tasklist
-     *
-     * @param array $tasklist
-     */
-    public function importTaskList(array $tasklist)
-    {
-        $this->tasklist = $tasklist;
-    }
-
-
-    /**
-     * DELETE
-     *
-     * @return $this
-     */
-    public function delete()
-    {
-        $this->tasklist['verb'] = 'DELETE';
+        $this->schemamap = $schemamap;
 
         return $this;
     }
 
 
     /**
-     * UPDATE
-     *
-     * @return $this
+     * 返回当前的 SchemaMap 实例。
      */
-    public function update()
+    public function getSchemaMap()
     {
-        $this->tasklist['verb'] = 'UPDATE';
+        return $this->schemamap;
+    }
 
-        return $this;
+
+    private function _________________________BUILD()
+    {
     }
 
 
     /**
-     * TRUNCATE
+     * build查询所需的SQL语句
      *
-     * @return $this
-     */
-    public function truncate()
-    {
-        $this->tasklist['verb'] = 'TRUNCATE';
-
-        return $this;
-    }
-
-
-    /**
-     * Builds the statement.
-     *
-     * @return $this
+     * @return
+     *      @@array
+     *      [
+     *          'statement'  => ...,
+     *          'parameters' => ...,
+     *      ]
      */
     public function build()
     {
-        $this->builder = $this->db->getBuilder();
-        if ($this->builder === null) {
-            throw new Exception('必须要指定一个Builder对象');
+        $builder = $this->getBuilder();
+        if ($builder === null) {
+            throw new Exception('Builder实例未指定');
         }
 
-        return $this->builder->build($this->tasklist);
-    }
-
-
-    /**
-     * Executes the SQL statement built and returns a DataSet object.
-     *
-     * @param string $sql
-     * @param array $sql_parameters
-     *
-     * @return DataSet
-     */
-    public function execute()
-    {
-        if (!$this->built) {
-            $this->build();
-        }
-
-        // Makes a DB connection.
-        if ($this->db->connect() === false) {
-            throw new Exception('Fail to connect the database.');
-        }
-
-        try {
-            $pdoStatement = $this->db->getPDO()->prepare($this->statement);
-            $success = $pdoStatement->execute($this->parameters);
-            return new DataSet($this->db, $pdoStatement, $success);
-        } catch (Exception $ex) {
-            return false;
-        }
-    }
-
-
-    private function _________________________DONE()
-    {
+        return $builder->build($this->tasklist);
     }
 
 
@@ -337,7 +226,7 @@ class Query
 
 
     /**
-     * SELECT
+     * 设置 SELECT 的 columnlist
      *
      * @param $columnlist
      *      @@array 数组形式的列表。
@@ -350,11 +239,9 @@ class Query
      *
      * @return $this
      */
-    public function select($columnlist = null)
+    public function columnlist($columnlist = null)
     {
-        $this->initArray('columnlist');
-
-        $this->tasklist['verb'] = 'SELECT';
+        $this->initArrayItem('columnlist');
 
         if (is_string($columnlist)) {
             $this->tasklist['columnlist'][] = ['raw', $columnlist];
@@ -375,7 +262,7 @@ class Query
      */
     public function distinct()
     {
-        $this->initArray('columnlist');
+        $this->initArrayItem('columnlist');
 
         $this->tasklist['columnlist'][] = ['distinct'];
 
@@ -393,7 +280,7 @@ class Query
      */
     public function count(array $columns = null, $alias = null)
     {
-        $this->initArray('columnlist');
+        $this->initArrayItem('columnlist');
 
         $this->tasklist['columnlist'][] = ['count', $columns, $alias];
 
@@ -412,9 +299,8 @@ class Query
     protected function whereInit()
     {
         $this->tasklist['where'] = new ConditionTree('AND');
-        $this->whereTree = &$this->tasklist['where'];
         $this->whereDict[''] = &$this->tasklist['where'];
-        $this->whereActive = $this->whereTree;
+        $this->whereActive = &$this->tasklist['where'];
     }
 
 
@@ -528,9 +414,8 @@ class Query
     protected function havingInit()
     {
         $this->tasklist['having'] = new ConditionTree('AND');
-        $this->havingTree = &$this->tasklist['having'];
         $this->havingDict[''] = &$this->tasklist['having'];
-        $this->havingActive = $this->havingTree;
+        $this->havingActive = &$this->tasklist['having'];
     }
 
 
@@ -649,7 +534,7 @@ class Query
      */
     public function join($tableB, $on, array $parameters = [])
     {
-        $this->initArray('join');
+        $this->initArrayItem('join');
 
         $this->tasklist['join'][] = ['JOIN', $tableB, $on, $parameters];
 
@@ -668,7 +553,7 @@ class Query
      */
     public function innerJoin($tableB, $on, array $parameters = [])
     {
-        $this->initArray('join');
+        $this->initArrayItem('join');
 
         $this->tasklist['join'][] = ['INNER JOIN', $tableB, $on, $parameters];
 
@@ -687,7 +572,7 @@ class Query
      */
     public function leftJoin($tableB, $on, array $parameters = [])
     {
-        $this->initArray('join');
+        $this->initArrayItem('join');
 
         $this->tasklist['join'][] = ['LEFT JOIN', $tableB, $on, $parameters];
 
@@ -706,7 +591,7 @@ class Query
      */
     public function rightJoin($tableB, $on, array $parameters = [])
     {
-        $this->initArray('join');
+        $this->initArrayItem('join');
 
         $this->tasklist['join'][] = ['RIGHT JOIN', $tableB, $on, $parameters];
 
@@ -728,7 +613,7 @@ class Query
      */
     public function groupBy($columns)
     {
-        $this->initArray('groupby');
+        $this->initArrayItem('groupby');
 
         $this->tasklist['groupby'][] = $columns;
 
@@ -745,7 +630,7 @@ class Query
      */
     public function orderBy($columns)
     {
-        $this->initArray('orderby');
+        $this->initArrayItem('orderby');
 
         $this->tasklist['orderby'][] = $columns;
 
@@ -768,26 +653,6 @@ class Query
     }
 
 
-    private function _________________________INSERT()
-    {
-    }
-
-
-    /**
-     * INSERT
-     *
-     * @return $this
-     */
-    public function insert(array $record)
-    {
-        $this->tasklist['verb'] = 'INSERT';
-
-        $this->tasklist['insert'] = $record;
-
-        return $this;
-    }
-
-
     private function _________________________UPDATE()
     {
     }
@@ -804,9 +669,9 @@ class Query
      */
     public function setValue($column, $value = null)
     {
-        $this->initArray('set');
+        $this->initArrayItem('set');
 
-        $this->tasklist['verb'] = 'UPDATE';
+
 
         if (is_string($column)) {
             $this->tasklist['set'][$column] = [
@@ -841,9 +706,9 @@ class Query
      */
     public function setExpr($column, $expr, array $parameters = [])
     {
-        $this->initArray('set');
+        $this->initArrayItem('set');
 
-        $this->tasklist['verb'] = 'UPDATE';
+
 
         $this->tasklist['set'][$column] = [
             'type'       => 'expr',
@@ -870,9 +735,9 @@ class Query
      */
     public function setFromTable($column, $tableB, $columnB, $colA, $colB, $checkExistsInWhere = true)
     {
-        $this->initArray('set');
+        $this->initArrayItem('set');
 
-        $this->tasklist['verb'] = 'UPDATE';
+
 
         $this->tasklist['set'][$column] = [
             'type'               => 'from_table',
@@ -896,9 +761,8 @@ class Query
      */
     public function increment($column, $value = 1)
     {
-        $this->initArray('set');
+        $this->initArrayItem('set');
 
-        $this->tasklist['verb'] = 'UPDATE';
 
         $this->setExpr($column, "$column + ?", [$value]);
 
@@ -914,12 +778,147 @@ class Query
      */
     public function decrement($column, $value = 1)
     {
-        $this->initArray('set');
+        $this->initArrayItem('set');
 
-        $this->tasklist['verb'] = 'UPDATE';
 
         $this->setExpr($column, "$column - ?", [$value]);
 
         return $this;
+    }
+
+
+    private function _________________________EXECUTIONS()
+    {
+    }
+
+
+    /**
+     * SELECT
+     *
+     * @return \Dida\Db\DataSet
+     */
+    public function select()
+    {
+        $this->tasklist['verb'] = 'SELECT';
+    }
+
+
+    /**
+     * INSERT
+     */
+    public function insert(array $record)
+    {
+        $this->tasklist['verb'] = 'INSERT';
+
+        $this->tasklist['record'] = $record;
+    }
+
+
+    /**
+     * UPDATE
+     */
+    public function update()
+    {
+        $this->tasklist['verb'] = 'UPDATE';
+    }
+
+
+    /**
+     * DELETE
+     *
+     * @return $this
+     */
+    public function delete()
+    {
+        $this->tasklist['verb'] = 'DELETE';
+    }
+
+
+    /**
+     * TRUNCATE
+     *
+     * @return $this
+     */
+    public function truncate()
+    {
+        $this->tasklist['verb'] = 'TRUNCATE';
+    }
+
+
+    /**
+     * 尝试执行未定义的方法。
+     *
+     * 虽然不倾向使用__call()，但是考虑到方便性，还是暂时保留。
+     * 最好用 overload 或者 Trait 等方式明确定义。
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     * @throws Exception
+     */
+    public function __call($name, $arguments)
+    {
+        // 如果是 DataSet 支持的方法
+        if (method_exists('\Dida\Db\DataSet', $name)) {
+            $dataset = $this->select();
+            return call_user_func_array([$dataset, $name], $arguments);
+        }
+
+        throw new Exception(sprintf('方法不存在 %s::%s', __CLASS__, $name));
+    }
+
+
+    private function _________________________UTILITIES()
+    {
+    }
+
+
+    /**
+     * 如果检查到 tasklist 中的某个数组类型的键不存在，就先创建一个。
+     *
+     * @param type $name
+     */
+    protected function initArrayItem($name)
+    {
+        if (!isset($this->tasklist[$name])) {
+            $this->tasklist[$name] = [];
+        }
+    }
+
+
+    /**
+     * 备份当前的 tasklist 和相关变量
+     *
+     * @return array
+     */
+    public function backupTaskList()
+    {
+        $data = [
+            'tasklist'     => $this->tasklist,
+            'whereActive'  => $this->whereActive->name,
+            'havingActive' => $this->havingActive->name,
+        ];
+        return $data;
+    }
+
+
+    /**
+     * 恢复当前的 tasklist 和相关变量
+     *
+     * @param array $tasklist
+     */
+    public function restoreTaskList(array $data)
+    {
+        extract($data);
+
+        $this->tasklist = $tasklist;
+
+        $this->whereDict = [];
+        $this->tasklist['where']->getNamedDictionary($this->whereDict);  // 重新生成速查字典
+        $this->whereActive = &$this->whereDict[$whereActive];  // 复位 whereActive
+
+        $this->havingDict = [];
+        $this->tasklist['having']->getNamedDictionary($this->havingDict);  // 重新生成速查字典
+        $this->havingActive = &$this->havingDict[$whereActive];  // 复位 havingActive
     }
 }

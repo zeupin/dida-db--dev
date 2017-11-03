@@ -10,9 +10,9 @@ use \PDO;
 use \Exception;
 
 /**
- * MysqlSchemaInfo
+ * MysqlSchemaMap
  */
-class MysqlSchemaInfo extends \Dida\Db\SchemaInfo
+class MysqlSchemaMap extends \Dida\Db\SchemaMap
 {
     /**
      * 列出指定数据库中的所有数据表的表名.

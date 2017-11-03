@@ -153,7 +153,7 @@ EOT;
      */
     public function testCacheAllTableInfo()
     {
-        $this->db->getSchemaInfo()->saveAllTableInfo();
+        $this->db->getSchemaMap()->saveAllTableInfo();
     }
 
 
@@ -162,7 +162,7 @@ EOT;
      */
     public function testReadTableInfo()
     {
-        $data = $this->db->getSchemaInfo()->readTableInfoFromCache('zp_test');
+        $data = $this->db->getSchemaMap()->readTableInfoFromCache('zp_test');
         //var_dump($data);
     }
 }

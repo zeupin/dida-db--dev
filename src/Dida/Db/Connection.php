@@ -15,18 +15,19 @@ use \Exception;
 class Connection
 {
     /**
-     * PDO实例
+     * PDO 实例
      *
      * @var \PDO
      */
     protected $pdo = null;
 
     /**
-     * PDOStatement实例
+     * PDOStatement 实例
      *
      * @var \PDOStatement
      */
     protected $pdoStatement = null;
+
 
     /**
      * 缺省设置
@@ -37,7 +38,7 @@ class Connection
         /* 必填参数 */
         'db.name'           => null, // 数据库的名字
         'db.driver'         => null, // 数据库驱动类型,如“Mysql”
-        'db.schemainfo_dir' => null, // SchemaInfo的缓存目录
+        'db.schemamap_dir' => null, // SchemaMap的缓存目录
 
         /* pdo 相关参数 */
         'db.dsn'      => null,
@@ -65,7 +66,7 @@ class Connection
 
 
     /**
-     * 设置$cfg
+     * 设置当前的 $cfg 数组
      *
      * @param array $cfg
      */
@@ -82,7 +83,7 @@ class Connection
 
 
     /**
-     * 返回实例的$cfg数组
+     * 返回当前的 $cfg 数组
      *
      * @return array
      */
@@ -108,12 +109,15 @@ class Connection
 
 
     /**
-     * 返回当前的PDOStatement实例。
+     * 返回当前的 PDOStatement 实例。
      */
     public function getPDOStatement()
     {
         return $this->pdoStatement;
     }
+
+
+
 
 
     /**
