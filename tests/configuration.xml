@@ -9,7 +9,7 @@
     <testsuite name="My Test Suite">
       <directory></directory>
       <file>DbTest.php</file>
-      <file>SqlQueryTest.php</file>
+      <file>ConnectionTest.php</file>
       <exclude>vendor</exclude>
     </testsuite>
   </testsuites>

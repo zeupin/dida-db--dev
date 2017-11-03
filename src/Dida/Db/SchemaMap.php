@@ -210,8 +210,8 @@ abstract class SchemaMap
         }
 
         // 处理单一主键和复合主键
-        $primarykeys = $this->getPrimaryKeys($table, $schema);
-        if ($primarykeys) {
+        $primarykeys = $this->getPrimaryKeys($table);
+        if (!$primarykeys) {
             $pri = null;
             $multipri = null;
         } elseif (count($primarykeys) == 1) {

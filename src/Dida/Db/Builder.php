@@ -77,6 +77,62 @@ class Builder
      */
     protected $PA = [];
 
+    /**
+     * 支持的操作符集合
+     */
+    protected static $opertor_set = [
+        /* Raw SQL */
+        'RAW' => 'RAW', //
+
+        /* 等于 */
+        'EQ' => 'EQ',
+        '='  => 'EQ',
+        '==' => 'EQ', //
+
+        /* 不等于 */
+        'NEQ' => 'NEQ',
+        '<>'  => 'NEQ',
+        '!='  => 'NEQ', //
+
+        /* <,>,<=,>= */
+        'GT'  => 'GT',
+        '>'   => 'GT',
+        'EGT' => 'EGT',
+        '>='  => 'EGT',
+        'LT'  => 'LT',
+        '<'   => 'LT',
+        'ELT' => 'ELT',
+        '<='  => 'ELT', //
+
+        /* LIKE */
+        'LIKE'     => 'LIKE',
+        'NOT LIKE' => 'NOTLIKE',
+        'NOTLIKE'  => 'NOTLIKE', //
+
+        /* IN */
+        'IN'     => 'IN',
+        'NOT IN' => 'NOTIN',
+        'NOTIN'  => 'NOTIN', //
+
+        /* BETWEEN */
+        'BETWEEN'     => 'BETWEEN',
+        'NOT BETWEEN' => 'NOTBETWEEN',
+        'NOTBETWEEN'  => 'NOTBETWEEN', //
+
+        /* EXISTS */
+        'EXISTS'     => 'EXISTS',
+        'NOT EXISTS' => 'NOTEXISTS',
+        'NOTEXISTS'  => 'NOTEXISTS', //
+
+        /* ISNULL */
+        'ISNULL'      => 'ISNULL',
+        'NULL'        => 'ISNULL',
+        'ISNOTNULL'   => 'ISNOTNULL',
+        'IS NOT NULL' => 'ISNOTNULL',
+        'NOTNULL'     => 'ISNOTNULL',
+        'NOT NULL'    => 'ISNOTNULL', //
+    ];
+
 
     /**
      * 类的构造函数
@@ -178,7 +234,7 @@ class Builder
 
         $STMT = [
             'INSERT INTO ',
-            'table'   => &$this->ST['table'],
+            'table'  => &$this->ST['table'],
             'record' => &$this->ST['record'],
         ];
 
@@ -274,6 +330,7 @@ class Builder
     protected function prepare_SELECT()
     {
         $this->clause_TABLE();
+        $this->clause_COLUMNLIST();
         $this->clause_JOIN();
         $this->clause_WHERE();
         $this->clause_GROUP_BY();
@@ -611,7 +668,7 @@ class Builder
 
         foreach ($conditionTree->items as $condition) {
             if ($condition instanceof ConditionTree) {
-                $parts[] = $condition->build();
+                $parts[] = $this->parse_conditionTree($condition);
             } else {
                 $parts[] = $this->cond($condition);
             }
@@ -619,7 +676,7 @@ class Builder
 
         // 合并 $parts 的 statement
         $stArray = array_column($parts, 'statement');
-        $st = implode(" $this->logic ", $stArray);
+        $st = implode(" $conditionTree->logic ", $stArray);
         $st = "($st)";
 
         // 合并 $parts 的 parameters

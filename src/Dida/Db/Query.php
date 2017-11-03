@@ -120,8 +120,8 @@ class Query
     {
         $this->tasklist = $this->taskbase;
 
-        $this->whereInit();
-        $this->havingInit();
+        $this->initWhere();
+        $this->initHaving();
 
         return $this;
     }
@@ -129,6 +129,21 @@ class Query
 
     private function _________________________BUILD()
     {
+    }
+
+
+    /**
+     * 设置一个verb。
+     *
+     * @param string $verb
+     */
+    public function verb($verb)
+    {
+        $verb = trim($verb);
+        $verb = strtoupper($verb);
+        $this->tasklist['verb'] = $verb;
+
+        return $this;
     }
 
 
@@ -144,11 +159,13 @@ class Query
      */
     public function build()
     {
-        $builder = $this->getBuilder();
+        // 获取 Builder 对象
+        $builder = $this->db->getBuilder();
         if ($builder === null) {
             throw new Exception('Builder实例未指定');
         }
 
+        // build
         return $builder->build($this->tasklist);
     }
 
@@ -257,8 +274,12 @@ class Query
     /**
      * 初始化 whereTree
      */
-    protected function whereInit()
+    protected function initWhere()
     {
+        if (isset($this->tasklist['where'])) {
+            return;
+        }
+
         $this->tasklist['where'] = new ConditionTree('AND');
         $this->whereDict = [];
         $this->whereDict[''] = &$this->tasklist['where'];
@@ -276,6 +297,9 @@ class Query
      */
     public function where($condition, array $data = [])
     {
+        // 初始化 [where]
+        $this->initWhere();
+
         if (is_string($condition)) {
             $this->whereActive->items[] = [$condition, 'RAW', $data];
         }
@@ -283,21 +307,6 @@ class Query
         if (is_array($condition)) {
             $this->whereActive->items[] = $condition;
         }
-
-        return $this;
-    }
-
-
-    /**
-     * 设置当前 whereTree 节点的 logic 属性。
-     *
-     * @param string $logic
-     *
-     * @return $this
-     */
-    public function whereLogic($logic)
-    {
-        $this->whereActive->logic = $logic;
 
         return $this;
     }
@@ -314,6 +323,9 @@ class Query
      */
     public function whereGroup(array $conditions = [], $logic = 'AND', $name = null)
     {
+        // 初始化 [where]
+        $this->initWhere();
+
         // 检查命名有无重复
         if (is_string($name)) {
             if (array_key_exists($name, $this->whereDict)) {
@@ -341,6 +353,25 @@ class Query
 
 
     /**
+     * 设置当前 whereTree 节点的 logic 属性。
+     *
+     * @param string $logic
+     *
+     * @return $this
+     */
+    public function whereLogic($logic)
+    {
+        // 初始化 [where]
+        $this->initWhere();
+
+        // 设置当前节点的连接逻辑
+        $this->whereActive->logic = $logic;
+
+        return $this;
+    }
+
+
+    /**
      * 匹配一个给出的数组。
      *
      * @param array $array
@@ -350,6 +381,9 @@ class Query
      */
     public function whereMatch(array $array, $logic = 'AND', $name = null)
     {
+        // 初始化 [where]
+        $this->initWhere();
+
         $conditions = [];
         foreach ($array as $key => $value) {
             $conditions[] = [$key, '=', $value];
@@ -388,8 +422,12 @@ class Query
     /**
      * 初始化 havingTree
      */
-    protected function havingInit()
+    protected function initHaving()
     {
+        if (isset($this->tasklist['having'])) {
+            return;
+        }
+
         $this->tasklist['having'] = new ConditionTree('AND');
         $this->havingDict = [];
         $this->havingDict[''] = &$this->tasklist['having'];
@@ -407,6 +445,9 @@ class Query
      */
     public function having($condition, array $data = [])
     {
+        // 初始化 [having]
+        $this->initHaving();
+
         if (is_string($condition)) {
             $this->havingActive->items[] = [$condition, 'RAW', $data];
         }
@@ -414,21 +455,6 @@ class Query
         if (is_array($condition)) {
             $this->havingActive->items[] = $condition;
         }
-
-        return $this;
-    }
-
-
-    /**
-     * 设置当前 havingTree 节点的 logic 属性。
-     *
-     * @param string $logic
-     *
-     * @return $this
-     */
-    public function havingLogic($logic)
-    {
-        $this->havingActive->logic = $logic;
 
         return $this;
     }
@@ -445,6 +471,9 @@ class Query
      */
     public function havingGroup(array $conditions = [], $logic = 'AND', $name = null)
     {
+        // 初始化 [having]
+        $this->initHaving();
+
         // 检查命名有无重复
         if (is_string($name)) {
             if (array_key_exists($name, $this->havingDict)) {
@@ -472,6 +501,25 @@ class Query
 
 
     /**
+     * 设置当前 havingTree 节点的 logic 属性。
+     *
+     * @param string $logic
+     *
+     * @return $this
+     */
+    public function havingLogic($logic)
+    {
+        // 初始化 [having]
+        $this->initHaving();
+
+        // 设置当前节点的连接逻辑
+        $this->havingActive->logic = $logic;
+
+        return $this;
+    }
+
+
+    /**
      * 匹配一个给出的数组。
      *
      * @param array $array
@@ -481,6 +529,9 @@ class Query
      */
     public function havingMatch(array $array, $logic = 'AND', $name = null)
     {
+        // 初始化 [having]
+        $this->initHaving();
+
         $conditions = [];
         foreach ($array as $key => $value) {
             $conditions[] = [$key, '=', $value];
@@ -790,9 +841,23 @@ class Query
      *
      * @return \Dida\Db\DataSet
      */
-    public function select()
+    public function select($columnlist = null)
     {
+        // 数据
+        if (!is_null($columnlist)) {
+            $this->columnlist($columnlist);
+        }
+
+        // 准备连接
+        $conn = $this->db->getConnection();
+
+        // 执行
         $this->tasklist['verb'] = 'SELECT';
+        $sql = $this->build();
+        $dataset = $conn->executeRead($sql['statement'], $sql['parameters']);
+
+        // 返回结果
+        return $dataset;
     }
 
 
@@ -801,9 +866,14 @@ class Query
      */
     public function insert(array $record)
     {
-        $this->tasklist['verb'] = 'INSERT';
-
+        // 数据
         $this->tasklist['record'] = $record;
+
+        // 准备连接
+        $conn = $this->db->getConnection();
+
+        // 执行
+        $this->tasklist['verb'] = 'INSERT';
     }
 
 
@@ -853,8 +923,13 @@ class Query
     {
         // 如果是 DataSet 支持的方法
         if (method_exists('\Dida\Db\DataSet', $name)) {
-            $dataset = $this->select();
-            return call_user_func_array([$dataset, $name], $arguments);
+            switch ($name) {
+                case 'getRow':
+                case 'getRows':
+                case "getColumn":
+                    $dataset = $this->select();
+                    return call_user_func_array([$dataset, $name], $arguments);
+            }
         }
 
         throw new Exception(sprintf('方法不存在 %s::%s', __CLASS__, $name));
@@ -906,12 +981,22 @@ class Query
 
         $this->tasklist = $tasklist;
 
-        $this->whereDict = [];
-        $this->tasklist['where']->getNamedDictionary($this->whereDict);  // 重新生成速查字典
-        $this->whereActive = &$this->whereDict[$whereActive];  // 复位 whereActive
+        if (isset($tasklist['where'])) {
+            $this->whereDict = [];
+            $this->tasklist['where']->getNamedDictionary($this->whereDict);  // 重新生成速查字典
+            $this->whereActive = &$this->whereDict[$whereActive];  // 复位 whereActive
+        } else {
+            $this->whereDict = [];
+            $this->whereActive = null;
+        }
 
-        $this->havingDict = [];
-        $this->tasklist['having']->getNamedDictionary($this->havingDict);  // 重新生成速查字典
-        $this->havingActive = &$this->havingDict[$whereActive];  // 复位 havingActive
+        if (isset($tasklist['having'])) {
+            $this->havingDict = [];
+            $this->tasklist['having']->getNamedDictionary($this->havingDict);  // 重新生成速查字典
+            $this->havingActive = &$this->havingDict[$whereActive];  // 复位 havingActive
+        } else {
+            $this->havingDict = [];
+            $this->havingActive = null;
+        }
     }
 }

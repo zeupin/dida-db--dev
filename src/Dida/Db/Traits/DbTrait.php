@@ -93,7 +93,7 @@ trait DbTrait
 
 
     /**
-     * @return array
+     * @return \Dida\Db\DataSet|false
      */
     public function executeRead($statement, array $parameters = null, $replace_prefix = false)
     {

@@ -8,12 +8,15 @@ use \Dida\Debug\Debug;
  */
 class QueryTest extends TestCase
 {
+    /**
+     * @var \Dida\Db\Db
+     */
     public $db = null;
 
     /**
-     * @var \Dida\Db\Query
+     * @var \Dida\Db\Connection
      */
-    public $sqlquery = null;
+    public $conn = null;
 
 
     /**
@@ -22,8 +25,7 @@ class QueryTest extends TestCase
     public function __construct()
     {
         $cfg = include(__DIR__ . "/db.config.php");
-        $conn = new Dida\Db\Connection($cfg);
-        $this->sqlquery = new Dida\Db\Query($conn);
+        $this->db = new Dida\Db\Mysql\MysqlDb($cfg);
     }
 
 
@@ -39,25 +41,27 @@ class QueryTest extends TestCase
 
     public function test_ConditionTree()
     {
-        $this->sqlquery
+        $this->resetMock(__DIR__ . '/zp_test.sql');
+
+        $query = $this->db->table('test');
+        print_r($query);
+
+        $query
             ->where('id > 3')
             ->where('id < 6')
             ->whereGroup([
                 ['a', '=', 1],
                 ['b', '=', 1],
-            ], 'OR', 'price')
+                ], 'OR', 'price')
             ->where('price > 8')
             ->where('price < 10')
             ->whereGoto('')
             ->where('age > 100')
             ->whereMatch(['name' => 'Mary', 'age' => 22])
-            ->where(['c', 'in', [1,2,3,4]])
-
-            ;
-        print_r($this->sqlquery->whereTree);
-        print_r($this->sqlquery->whereTree->build());
-        //echo Debug::varDump(__METHOD__, $this->sqlquery->whereObject);
-        die();
+            ->where(['c', 'in', [1, 2, 3, 4]])
+        ;
+        $sql = $query->verb('select')->build();
+        print_r($sql);
     }
 
 
@@ -66,8 +70,10 @@ class QueryTest extends TestCase
      */
     public function testMultiTables()
     {
-        $sql = $this->db->table('test as a, test as b', 'zp_');
-        $result = $sql->select()->build();
+        $query = $this->db->table('test as a, test as b', 'zp_');
+
+        $sql = $query->verb('select')->build();
+        print_r($sql);
     }
 
 
@@ -76,8 +82,10 @@ class QueryTest extends TestCase
      */
     public function testSingleTables()
     {
-        $sql = $this->db->table('test as t', 'zp_');
-        $result = $sql->select()->build();
+        $query = $this->db->table('test as t', 'zp_');
+
+        $sql = $query->verb('select')->build();
+        print_r($sql);
     }
 
 
@@ -88,10 +96,9 @@ class QueryTest extends TestCase
     {
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
-        $this->db->connect();
-        $sql = $this->db->table('test', 'zp_');
-        $result = $sql->select(["count(*)"])->execute()->getRow();
-        $this->assertEquals(1, $result['id']);
+        $query = $this->db->table('test', 'zp_');
+        $result = $query->select(["count(*)"])->getRow();
+        print_r($result);
     }
 
 
@@ -100,16 +107,15 @@ class QueryTest extends TestCase
      */
     public function test0Table()
     {
-        $admin = $this->db->table('test')
-            ->build();
+        $admin = $this->db->table('test')->build();
         $expected = <<<EOT
 SELECT
     *
 FROM
     zp_test
 EOT;
-        $this->assertEquals($expected, $admin->statement);
-        $this->assertEquals([], $admin->parameters);
+        $this->assertEquals($expected, $admin['statement']);
+        $this->assertEquals([], $admin['parameters']);
     }
 
 

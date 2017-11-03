@@ -237,7 +237,7 @@ class Connection
      * @param array $parameters 参数数组
      * @param boolean $replace_prefix 是否替换表前缀
      *
-     * @return array 成功，返回一个二维数组；失败，返回false。
+     * @return \Dida\Db\DataSet|false 成功，返回一个DataSet；失败，返回false。
      */
     public function executeRead($statement, array $parameters = null, $replace_prefix = false)
     {
@@ -249,7 +249,8 @@ class Connection
         $result = $this->execute($statement, $parameters);
 
         if ($result) {
-            return $this->pdoStatement->fetchAll();
+            $dataset = new DataSet($this->pdoStatement);
+            return $dataset;
         } else {
             return false;
         }
