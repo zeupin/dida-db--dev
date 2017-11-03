@@ -174,7 +174,7 @@ EOT;
 
 
     /**
-     * 测试使用 getColumn() 方法时，用列号和列名是否能得到一致的结果
+     * 测试 count()
      */
     public function test_count()
     {
@@ -190,5 +190,45 @@ FROM
     zp_test
 EOT;
         $this->assertEquals($expected, $result['statement']);
+    }
+
+
+    /**
+     * 测试 delete()
+     */
+    public function test_delete()
+    {
+        $this->resetMock(__DIR__ . '/zp_test.sql');
+
+        $t = $this->db->table('test');
+        $result = $t->verb('DELETE')->build();
+        print_r($result);
+        $expected = <<<'EOT'
+DELETE FROM zp_test
+EOT;
+        $this->assertEquals($expected, $result['statement']);
+
+        $result = $t->delete();
+        $this->assertEquals(2, $result);
+    }
+
+
+    /**
+     * 测试 truncate()
+     */
+    public function test_truncate()
+    {
+        $this->resetMock(__DIR__ . '/zp_test.sql');
+
+        $t = $this->db->table('test');
+        $result = $t->verb('TRUNCATE')->build();
+        print_r($result);
+        $expected = <<<'EOT'
+TRUNCATE TABLE zp_test
+EOT;
+        $this->assertEquals($expected, $result['statement']);
+
+        $result = $t->delete();
+        $this->assertEquals(2, $result);
     }
 }

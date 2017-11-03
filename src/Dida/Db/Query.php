@@ -874,6 +874,7 @@ class Query
 
         // 执行
         $this->tasklist['verb'] = 'INSERT';
+        $sql = $this->build();
     }
 
 
@@ -893,7 +894,14 @@ class Query
      */
     public function delete()
     {
+        // 准备连接
+        $conn = $this->db->getConnection();
+
+        // 执行
         $this->tasklist['verb'] = 'DELETE';
+        $sql = $this->build();
+        $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
+        return $rowsAffected;
     }
 
 
@@ -904,7 +912,14 @@ class Query
      */
     public function truncate()
     {
+        // 准备连接
+        $conn = $this->db->getConnection();
+
+        // 执行
         $this->tasklist['verb'] = 'TRUNCATE';
+        $sql = $this->build();
+        $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
+        return $rowsAffected;
     }
 
 
