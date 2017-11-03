@@ -16,7 +16,7 @@ use \Dida\Debug\Debug;
 class Builder
 {
     /**
-     * 指向Db实例的指针
+     * 指向 Db 连接的指针
      *
      * @var \Dida\Db\Db
      */
@@ -28,10 +28,11 @@ class Builder
      *
      * [
      *     表名 => [
-     *          'columnlist' =>[], // 全部列名的列表
-     *          'columns' => ,   // 列的详细信息
-     *          'pri' => ,       // 主键字段名
-     *          'uni' => [],     // 唯一索引的字段
+     *          'columnlist' => [],    // 一维数组，全部列名的列表
+     *          'columns' => [[]],     // 二维数组，列的详细信息
+     *          'pri' => string|null,  // 单一主键的字段名，没有单一主键此处为null
+     *          'multipri' => []|null, // 组合主键的字段列表，没有组合主键，此处为null
+     *          'uni' => [],           // 唯一索引的字段
      *          ],
      * ]
      *

@@ -34,11 +34,35 @@ class Db
      */
     protected $schemamap = null;
 
+    /**
+     * 缺省设置
+     *
+     * @var array
+     */
+    protected $cfg = [
+        /* 必填参数 */
+        'db.name'          => null, // 数据库的名字
+        'db.driver'        => null, // 数据库驱动类型,如“Mysql”
+        'db.schemamap_dir' => null, // SchemaMap的缓存目录
+
+        /* pdo 相关参数 */
+        'db.dsn'      => null,
+        'db.username' => null,
+        'db.password' => null,
+        'db.options'  => [], // pdo连接参数
+
+        /* 可选参数 */
+        'db.charset'     => 'utf8',
+        'db.persistence' => false, // 是否用长连接
+        'db.prefix'      => '', // 默认的数据表前缀
+        'db.swap_prefix' => '###_', // 默认的数据表形式前缀
+    ];
+
 
     /**
      * 类构造函数
      */
-    public function __construct(array $cfg = [])
+    public function __construct(array $cfg)
     {
         $this->setConfig($cfg);
     }
@@ -66,63 +90,96 @@ class Db
      *
      * @return array
      */
-    public function &getConfig()
+    public function getConfig()
     {
         return $this->cfg;
     }
 
 
     /**
-     * 获取的SchemaMap实例
+     * 设置当前的 Connection 实例。
      *
-     * @return \Dida\Db\SchemaMap
+     * @param \Dida\Db\Connection $connection
      */
-    public function &getSchemaMap()
+    public function setConnection($connection)
     {
-        return $this->schemamap;
+        $this->connection = $connection;
+
+        return $this;
     }
 
 
     /**
-     * 获取配置的Builder实例
+     * 返回当前的 Connection 实例。
      *
-     * @return \Dida\Db\Builder
+     * @return \Dida\Db\Connection
      */
-    public function &getBuilder()
+    public function getConnection()
+    {
+        return $this->connection;
+    }
+
+
+    /**
+     * 设置当前的 Builder 实例。
+     *
+     * @param \Dida\Db\Builder $builder
+     */
+    public function setBuilder($builder)
+    {
+        $this->builder = $builder;
+
+        return $this;
+    }
+
+
+    /**
+     * 返回当前的 Builder 实例。
+     *
+     * @return  \Dida\Db\Builder
+     */
+    public function getBuilder()
     {
         return $this->builder;
     }
 
 
     /**
-     * 返回连接
+     * 设置当前的 SchemaMap 实例。
      *
-     * @param string $name Connection的名称
+     * @param \Dida\Db\SchemaMap $schemamap
      */
-    public function &getConnection($name = null)
+    public function setSchemeMap($schemamap)
     {
-        if (!is_string($name)) {
-            $name = '';
-        }
+        $this->schemamap = $schemamap;
 
-        if (array_key_exists($name, $this->connections)) {
-            return $this->connections[$name];
-        } else {
-            return null;
-        }
+        return $this;
+    }
+
+
+    /**
+     * 返回当前的 SchemaMap 实例。
+     *
+     * @return  \Dida\Db\SchemaMap
+     */
+    public function getSchemaMap()
+    {
+        return $this->schemamap;
     }
 
 
     /**
      * 创建一个新的Query实例对象。
-     * 对不同的数据库，建议重写对应的逻辑，覆盖掉本方法。
+     *
+     * 针对不同的数据库，建议重写对应的逻辑，覆盖掉本方法。
      *
      * @return Query
      */
     protected function newQuery()
     {
-        $sql = new Query($this);
-        return $sql;
+        $query = new Query($this);
+
+        return $query;
     }
 
 
@@ -136,10 +193,10 @@ class Db
      */
     public function table($table, $prefix = null)
     {
-        $sql = $this->newQuery();
+        $query = $this->newQuery();
 
-        $sql->table($table, $prefix);
+        $query->table($table, $prefix);
 
-        return $sql;
+        return $query;
     }
 }

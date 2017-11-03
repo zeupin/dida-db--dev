@@ -19,9 +19,9 @@ class Query
     const VERSION = '0.1.5';
 
     /**
-     * @var \Dida\Db\Connection
+     * @var \Dida\Db\Db
      */
-    protected $conn = null;
+    protected $db = null;
 
     /**
      * Builder 实例。
@@ -87,16 +87,16 @@ class Query
     /**
      * Class construct.
      *
-     * @param array $options
      * @param \Dida\Db\Db $db
      */
     public function __construct(&$db)
     {
         $this->db = $db;
 
-        $cfg = $db->getConfig();
-
+        // 初始化 taskbase
+        $cfg = $this->db->getConfig();
         $this->taskbase = array_merge($this->taskbase, [
+            'driver'      => $cfg['db.driver'],
             'prefix'      => $cfg['db.prefix'],
             'swap_prefix' => $cfg['db.swap_prefix'],
         ]);
@@ -124,45 +124,6 @@ class Query
         $this->havingInit();
 
         return $this;
-    }
-
-
-    /**
-     * 设置当前的 Builder 实例。
-     */
-    public function setBuilder($builder)
-    {
-        $this->builder = $builder;
-        return $this;
-    }
-
-
-    /**
-     * 返回当前的 Builder 实例。
-     */
-    public function getBuilder()
-    {
-        return $this->builder;
-    }
-
-
-    /**
-     * 设置当前的 SchemaMap 实例。
-     */
-    public function setSchemeMap($schemamap)
-    {
-        $this->schemamap = $schemamap;
-
-        return $this;
-    }
-
-
-    /**
-     * 返回当前的 SchemaMap 实例。
-     */
-    public function getSchemaMap()
-    {
-        return $this->schemamap;
     }
 
 
@@ -299,6 +260,7 @@ class Query
     protected function whereInit()
     {
         $this->tasklist['where'] = new ConditionTree('AND');
+        $this->whereDict = [];
         $this->whereDict[''] = &$this->tasklist['where'];
         $this->whereActive = &$this->tasklist['where'];
     }
@@ -352,13 +314,28 @@ class Query
      */
     public function whereGroup(array $conditions = [], $logic = 'AND', $name = null)
     {
+        // 检查命名有无重复
+        if (is_string($name)) {
+            if (array_key_exists($name, $this->whereDict)) {
+                throw new Exception("重复定义HAVING命名组");
+            }
+        }
+
+        // 生成新对象
         $group = new ConditionTree($logic);
+        $group->name = $name;
         $group->items = $conditions;
 
+        // 把新对象插入到当前位置的子节点上
         $this->whereActive->items[] = &$group;
-        $this->whereDict[$name] = &$group;
         $this->whereActive = &$group;
 
+        // 加入到速查字典
+        if (is_string($name)) {
+            $this->whereDict[$name] = &$group;
+        }
+
+        // 返回
         return $this;
     }
 
@@ -414,6 +391,7 @@ class Query
     protected function havingInit()
     {
         $this->tasklist['having'] = new ConditionTree('AND');
+        $this->havingDict = [];
         $this->havingDict[''] = &$this->tasklist['having'];
         $this->havingActive = &$this->tasklist['having'];
     }
@@ -467,13 +445,28 @@ class Query
      */
     public function havingGroup(array $conditions = [], $logic = 'AND', $name = null)
     {
+        // 检查命名有无重复
+        if (is_string($name)) {
+            if (array_key_exists($name, $this->havingDict)) {
+                throw new Exception("重复定义HAVING命名组");
+            }
+        }
+
+        // 生成新对象
         $group = new ConditionTree($logic);
+        $group->name = $name;
         $group->items = $conditions;
 
+        // 把新对象插入到当前位置的子节点上
         $this->havingActive->items[] = &$group;
-        $this->havingDict[$name] = &$group;
         $this->havingActive = &$group;
 
+        // 加入到速查字典
+        if (is_string($name)) {
+            $this->havingDict[$name] = &$group;
+        }
+
+        // 返回
         return $this;
     }
 

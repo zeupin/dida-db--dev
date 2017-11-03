@@ -28,7 +28,6 @@ class Connection
      */
     protected $pdoStatement = null;
 
-
     /**
      * 缺省设置
      *
@@ -36,8 +35,8 @@ class Connection
      */
     protected $cfg = [
         /* 必填参数 */
-        'db.name'           => null, // 数据库的名字
-        'db.driver'         => null, // 数据库驱动类型,如“Mysql”
+        'db.name'          => null, // 数据库的名字
+        'db.driver'        => null, // 数据库驱动类型,如“Mysql”
         'db.schemamap_dir' => null, // SchemaMap的缓存目录
 
         /* pdo 相关参数 */
@@ -115,9 +114,6 @@ class Connection
     {
         return $this->pdoStatement;
     }
-
-
-
 
 
     /**
