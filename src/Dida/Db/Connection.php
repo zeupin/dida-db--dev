@@ -28,30 +28,6 @@ class Connection
      */
     protected $pdoStatement = null;
 
-    /**
-     * 缺省设置
-     *
-     * @var array
-     */
-    protected $cfg = [
-        /* 必填参数 */
-        'db.name'          => null, // 数据库的名字
-        'db.driver'        => null, // 数据库驱动类型,如“Mysql”
-        'db.schemamap_dir' => null, // SchemaMap的缓存目录
-
-        /* pdo 相关参数 */
-        'db.dsn'      => null,
-        'db.username' => null,
-        'db.password' => null,
-        'db.options'  => [], // pdo连接参数
-
-        /* 可选参数 */
-        'db.charset'     => 'utf8',
-        'db.persistence' => false, // 是否用长连接
-        'db.prefix'      => '', // 默认的数据表前缀
-        'db.swap_prefix' => '###_', // 默认的数据表形式前缀
-    ];
-
 
     /**
      * 类的构造函数
