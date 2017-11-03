@@ -549,7 +549,11 @@ class Builder
                         $final = $final . (($final) ? ", " : '');
                         $final .= "COUNT($columnlist_for_count)";
                     } else {
-                        $final = "COUNT($final)";
+                        if ($final === '') {
+                            $final = 'COUNT(*)';
+                        } else {
+                            $final = "COUNT($final)";
+                        }
                     }
 
                     // 如果有别名

@@ -171,4 +171,24 @@ EOT;
         $data = $this->db->getSchemaMap()->readTableInfoFromCache('zp_test');
         //var_dump($data);
     }
+
+
+    /**
+     * 测试使用 getColumn() 方法时，用列号和列名是否能得到一致的结果
+     */
+    public function test_count()
+    {
+        $this->resetMock(__DIR__ . '/zp_test.sql');
+
+        $t = $this->db->table('test');
+        $result = $t->count()->verb('SELECT')->build();
+        print_r($result);
+        $expected = <<<'EOT'
+SELECT
+    COUNT(*)
+FROM
+    zp_test
+EOT;
+        $this->assertEquals($expected, $result['statement']);
+    }
 }
