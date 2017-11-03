@@ -15,6 +15,11 @@ use \Exception;
 class Connection
 {
     /**
+     * @var \Dida\Db\Db
+     */
+    protected $db = null;
+
+    /**
      * PDO 实例
      *
      * @var \PDO
@@ -28,43 +33,40 @@ class Connection
      */
     protected $pdoStatement = null;
 
+    /**
+     * 配置
+     *
+     * @var array
+     */
+    protected $cfg = [];
+
 
     /**
      * 类的构造函数
      *
-     * @param array $config
+     * @param \Dida\Db\Db $db
      */
-    public function __construct(array $cfg)
+    public function __construct(&$db)
     {
-        $this->setConfig($cfg);
+        $this->db = $db;
+        
+        $this->initConfig();
     }
 
 
-    /**
-     * 设置当前的 $cfg 数组
-     *
-     * @param array $cfg
-     */
-    public function setConfig(array $cfg)
+    protected function initConfig()
     {
-        foreach ($this->cfg as $key => $value) {
-            if (array_key_exists($key, $cfg)) {
-                $this->cfg[$key] = $cfg[$key];
-            }
-        }
+        $cfg = $this->db->getConfig();
 
-        return $this;
-    }
-
-
-    /**
-     * 返回当前的 $cfg 数组
-     *
-     * @return array
-     */
-    public function getConfig()
-    {
-        return $this->cfg;
+        $this->cfg = [
+            'db.driver'      => $cfg['db.driver'],
+            'db.dsn'         => $cfg['db.dsn'],
+            'db.username'    => $cfg['db.username'],
+            'db.password'    => $cfg['db.password'],
+            'db.options'     => $cfg['db.options'],
+            'db.prefix'      => $cfg['db.prefix'],
+            'db.swap_prefix' => $cfg['db.swap_prefix'],
+        ];
     }
 
 

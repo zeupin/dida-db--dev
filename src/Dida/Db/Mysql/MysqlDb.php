@@ -20,11 +20,11 @@ class MysqlDb extends \Dida\Db\Db
     {
         parent::__construct($cfg);
 
-        // Set the dbtype
-        $this->dbtype = 'Mysql';
+        // 数据库的 driver 名称
+        $this->cfg['db.driver'] = 'Mysql';
 
         // 配置 Connection
-        $this->connection = new \Dida\Db\Connection($cfg);
+        $this->connection = new \Dida\Db\Connection($this);
 
         // 配置 Builder，使用标准的 Builder
         $this->builder = new \Dida\Db\Builder($this);

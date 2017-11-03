@@ -69,7 +69,7 @@ class Db
 
 
     /**
-     * 设置$cfg
+     * 设置 $cfg
      *
      * @param array $cfg
      */
@@ -86,7 +86,7 @@ class Db
 
 
     /**
-     * 返回实例的$cfg数组
+     * 返回实例的 $cfg
      *
      * @return array
      */
