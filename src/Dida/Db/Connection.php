@@ -71,6 +71,77 @@ class Connection
 
 
     /**
+     * 连接数据库
+     *
+     * @return boolean 成功返回true，失败返回false
+     */
+    public function connect()
+    {
+        // 如果连接已经建立
+        if ($this->pdo !== null) {
+            return true;
+        }
+
+        // 否则，建立一个连接
+        try {
+            $this->pdo = new PDO(
+                $this->cfg['db.dsn'], $this->cfg['db.username'], $this->cfg['db.password'], $this->cfg['db.options']
+            );
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+
+    /**
+     * 断开数据库连接
+     *
+     * @return void
+     */
+    public function disconnect()
+    {
+        $this->pdo = null;
+    }
+
+
+    /**
+     * 检查是否已经连接数据库
+     *
+     * @return boolean
+     */
+    public function isConnected()
+    {
+        return ($this->pdo !== null);
+    }
+
+
+    /**
+     * 连接是否还能正常工作。
+     * 检查是否已经连接数据库，且尚未被数据库断开，并能正常执行sql语句。
+     *
+     * @return boolean
+     */
+    public function worksWell()
+    {
+        if ($this->pdo === null) {
+            return false;
+        }
+
+        // 检查是否能执行简单的SQL语句
+        try {
+            if ($this->pdo->query('SELECT 1') === false) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+
+    /**
      * 立即连接数据库，并返回PDO实例
      *
      * @return \PDO|false
@@ -128,77 +199,6 @@ class Connection
         } else {
             return $this->pdoStatement->errorInfo();
         }
-    }
-
-
-    /**
-     * 连接数据库
-     *
-     * @return boolean 成功返回true，失败返回false
-     */
-    public function connect()
-    {
-        // 如果连接已经建立
-        if ($this->pdo !== null) {
-            return true;
-        }
-
-        // 否则，建立一个连接
-        try {
-            $this->pdo = new PDO(
-                $this->cfg['db.dsn'], $this->cfg['db.username'], $this->cfg['db.password'], $this->cfg['db.options']
-            );
-            return true;
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-
-    /**
-     * 检查是否已经连接数据库
-     *
-     * @return boolean
-     */
-    public function isConnected()
-    {
-        return ($this->pdo !== null);
-    }
-
-
-    /**
-     * 连接是否还能正常工作。
-     * 检查是否已经连接数据库，且尚未被数据库断开，并能正常执行sql语句。
-     *
-     * @return boolean
-     */
-    public function worksWell()
-    {
-        if ($this->pdo === null) {
-            return false;
-        }
-
-        // 检查是否能执行简单的SQL语句
-        try {
-            if ($this->pdo->query('SELECT 1') === false) {
-                return false;
-            } else {
-                return true;
-            }
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-
-    /**
-     * 断开数据库连接
-     *
-     * @return void
-     */
-    public function disconnect()
-    {
-        $this->pdo = null;
     }
 
 

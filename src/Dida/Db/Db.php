@@ -59,8 +59,12 @@ class Db
     ];
 
 
+    /**
+     * 扩展方法
+     */
     use Traits\DbTrait;
-    
+
+
     /**
      * 类构造函数
      */
@@ -116,7 +120,7 @@ class Db
      *
      * @return \Dida\Db\Connection
      */
-    public function getConnection()
+    public function &getConnection()
     {
         return $this->connection;
     }
@@ -140,7 +144,7 @@ class Db
      *
      * @return  \Dida\Db\Builder
      */
-    public function getBuilder()
+    public function &getBuilder()
     {
         return $this->builder;
     }
@@ -164,7 +168,7 @@ class Db
      *
      * @return  \Dida\Db\SchemaMap
      */
-    public function getSchemaMap()
+    public function &getSchemaMap()
     {
         return $this->schemamap;
     }

@@ -14,9 +14,36 @@ trait DbTrait
     /**
      * @return boolean
      */
+    public function connect()
+    {
+        return $this->getConnection()->connect();
+    }
+
+
+    /**
+     * @return boolean
+     */
+    public function disconnect()
+    {
+        return $this->getConnection()->disconnect();
+    }
+
+
+    /**
+     * @return boolean
+     */
     public function isConnected()
     {
-        return $this->getConnection()->errorCode();
+        return $this->getConnection()->isConnected();
+    }
+
+
+    /**
+     * @return boolean
+     */
+    public function worksWell()
+    {
+        return $this->getConnection()->worksWell();
     }
 
 

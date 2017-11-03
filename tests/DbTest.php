@@ -8,6 +8,9 @@ use \Dida\Debug\Debug;
  */
 class DbTest extends TestCase
 {
+    /**
+     * @var \Dida\Db\Db
+     */
     public $db = null;
 
 
@@ -77,7 +80,7 @@ class DbTest extends TestCase
     {
         // 没有设置data，应该是失败
         $result = $this->db->executeRead('SELECT * FROM this_table_not_exists');
-        $this->assertFalse( $result);
+        $this->assertFalse($result);
 
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
@@ -91,11 +94,11 @@ class DbTest extends TestCase
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
         // 没有设置data，应该是失败
-        $result = $this->db->insert('INSERT INTO zp_test(code,name,price) VALUES (?,?,?)');
-        $this->assertEquals(false, $result);
+        $result = $this->db->executeWrite('INSERT INTO zp_test(code,name,price) VALUES (?,?,?)');
+        $this->assertFalse($result);
 
         // 正常插入
-        $result = $this->db->insert('INSERT INTO zp_test(id,code,name,price,modified_at) VALUES (?,?,?,?,?)', [
+        $result = $this->db->executeWrite('INSERT INTO zp_test(id,code,name,price,modified_at) VALUES (?,?,?,?,?)', [
             5, 'orange', "江西脐橙", 6.8, date("Y-m-d H:i:s")
         ]);
         $this->assertEquals('00000', $this->db->errorCode());
@@ -103,7 +106,7 @@ class DbTest extends TestCase
         echo Debug::varDump(__METHOD__, $result, $this->db->errorCode(), $this->db->errorInfo(), $this->db->getPDO()->lastInsertId());
 
         // 测试部分插入
-        $result = $this->db->insert('INSERT INTO zp_test(code,name,price) VALUES (?,?,?)', [
+        $result = $this->db->executeWrite('INSERT INTO zp_test(code,name,price) VALUES (?,?,?)', [
             uniqid(), "江西脐橙", 6.8
         ]);
         $this->assertEquals('00000', $this->db->errorCode());
@@ -117,11 +120,11 @@ class DbTest extends TestCase
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
         // 没有设置data，应该是失败
-        $result = $this->db->update('UPDATE zp_test SET code=? WHERE id=?');
-        $this->assertEquals(false, $result);
+        $result = $this->db->executeWrite('UPDATE zp_test SET code=? WHERE id=?');
+        $this->assertFalse($result);
 
         // 正常测试
-        $result = $this->db->update('UPDATE zp_test SET code=? WHERE id=?', [uniqid(), 1]);
+        $result = $this->db->executeWrite('UPDATE zp_test SET code=? WHERE id=?', [uniqid(), 1]);
         $this->assertEquals('00000', $this->db->errorCode());
         $this->assertEquals(1, $result);
         echo Debug::varDump(__METHOD__, $result, $this->db->errorCode(), $this->db->errorInfo());
@@ -133,11 +136,11 @@ class DbTest extends TestCase
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
         // 没有设置data，应该是失败
-        $result = $this->db->delete('DELETE FROM zp_test WHERE id=?');
-        $this->assertEquals(false, $result);
+        $result = $this->db->executeWrite('DELETE FROM zp_test WHERE id=?');
+        $this->assertFalse($result);
 
         // 正常测试
-        $result = $this->db->delete('DELETE FROM zp_test WHERE id=?', [1]);
+        $result = $this->db->executeWrite('DELETE FROM zp_test WHERE id=?', [1]);
         $this->assertEquals('00000', $this->db->errorCode());
         $this->assertEquals(1, $result);
         echo Debug::varDump(__METHOD__, $result, $this->db->errorCode(), $this->db->errorInfo());

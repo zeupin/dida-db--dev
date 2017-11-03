@@ -9,6 +9,11 @@ use \Dida\Debug\Debug;
 class ConnectionTest extends TestCase
 {
     /**
+     * @var \Dida\Db\Db
+     */
+    public $db = null;
+
+    /**
      * @var \Dida\Db\Connection
      */
     public $conn = null;
@@ -20,8 +25,9 @@ class ConnectionTest extends TestCase
     public function __construct()
     {
         $cfg = include(__DIR__ . "/db.config.php");
-        $this->conn = new Dida\Db\Connection($cfg);
-        $this->conn->setConfig($cfg);
+        $this->db = new Dida\Db\Mysql\MysqlDb($cfg);
+
+        $this->conn = $this->db->getConnection();
     }
 
 
@@ -32,16 +38,6 @@ class ConnectionTest extends TestCase
     {
         $sql = file_get_contents($sql_file);
         $this->conn->getPDO()->exec($sql);
-    }
-
-
-    public function test_init()
-    {
-        $cfg = include(__DIR__ . "/db.config.php");
-        $this->conn = new Dida\Db\Connection($cfg);
-        $this->conn->setConfig($cfg);
-        $cfgCurrent = $this->conn->getConfig();
-        echo Debug::varDump(__METHOD__, $cfg, $cfgCurrent);
     }
 
 
