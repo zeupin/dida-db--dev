@@ -129,10 +129,8 @@ class Builder
             case 'UPDATE':
                 return $this->build_UPDATE();
             case 'DELETE':
-
                 return $this->build_DELETE();
             case 'TRUNCATE':
-
                 return $this->build_TRUNCATE();
             default:
                 throw new Exception("Invalid build verb: {$this->tasklist['verb']}");

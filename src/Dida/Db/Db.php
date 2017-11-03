@@ -59,6 +59,8 @@ class Db
     ];
 
 
+    use Traits\DbTrait;
+    
     /**
      * 类构造函数
      */

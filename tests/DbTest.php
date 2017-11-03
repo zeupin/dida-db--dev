@@ -23,7 +23,7 @@ class DbTest extends TestCase
 
 
     /**
-     * 执行一个SQL文件
+     * 执行一个mock的SQL文件
      */
     public function resetMock($sql_file)
     {
@@ -76,12 +76,12 @@ class DbTest extends TestCase
     public function test_select()
     {
         // 没有设置data，应该是失败
-        $result = $this->db->select('SELECT * FROM this_table_not_exists');
-        $this->assertEquals(false, $result);
+        $result = $this->db->executeRead('SELECT * FROM this_table_not_exists');
+        $this->assertFalse( $result);
 
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
-        $result = $this->db->select('SELECT * FROM zp_test');
+        $result = $this->db->executeRead('SELECT * FROM zp_test');
         echo Debug::varDump(__METHOD__, $result);
     }
 

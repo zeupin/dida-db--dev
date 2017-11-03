@@ -49,7 +49,7 @@ class Connection
     public function __construct(&$db)
     {
         $this->db = $db;
-        
+
         $this->initConfig();
     }
 
@@ -87,6 +87,8 @@ class Connection
 
     /**
      * 返回当前的 PDOStatement 实例。
+     *
+     * @return \PDOStatement
      */
     public function getPDOStatement()
     {
