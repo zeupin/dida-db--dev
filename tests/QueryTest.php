@@ -60,7 +60,7 @@ class QueryTest extends TestCase
             ->whereMatch(['name' => 'Mary', 'age' => 22])
             ->where(['c', 'in', [1, 2, 3, 4]])
         ;
-        $sql = $query->verb('select')->build();
+        $sql = $query->build('SELECT');
         print_r($sql);
     }
 
@@ -72,7 +72,7 @@ class QueryTest extends TestCase
     {
         $query = $this->db->table('test as a, test as b', 'zp_');
 
-        $sql = $query->verb('select')->build();
+        $sql = $query->build('SELECT');
         print_r($sql);
     }
 
@@ -84,7 +84,7 @@ class QueryTest extends TestCase
     {
         $query = $this->db->table('test as t', 'zp_');
 
-        $sql = $query->verb('select')->build();
+        $sql = $query->build('SELECT');
         print_r($sql);
     }
 
@@ -181,7 +181,7 @@ EOT;
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
         $t = $this->db->table('test');
-        $result = $t->verb('SELECT')->build();
+        $result = $t->build('SELECT');
         print_r($result);
         $expected = <<<'EOT'
 SELECT
@@ -204,7 +204,7 @@ EOT;
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
         $t = $this->db->table('test');
-        $result = $t->count()->verb('SELECT')->build();
+        $result = $t->count()->build('SELECT');
         print_r($result);
         $expected = <<<'EOT'
 SELECT
@@ -224,7 +224,7 @@ EOT;
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
         $t = $this->db->table('test');
-        $result = $t->verb('DELETE')->build();
+        $result = $t->build('DELETE');
         print_r($result);
         $expected = <<<'EOT'
 DELETE FROM zp_test
@@ -244,7 +244,7 @@ EOT;
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
         $t = $this->db->table('test');
-        $result = $t->verb('TRUNCATE')->build();
+        $result = $t->build('TRUNCATE');
         print_r($result);
         $expected = <<<'EOT'
 TRUNCATE TABLE zp_test
@@ -270,10 +270,27 @@ EOT;
         ];
 
         $t = $this->db->table('test');
-        $result = $t->record($record)->verb('INSERT')->build();
+        $result = $t->record($record)->build('INSERT');
         print_r($result);
 
-        $result = $t->insert();
+        // 插入一条记录
+        $result = $t->insert($record);
         $this->assertEquals(1, $result);
+
+        // 插入多条记录
+        $result = $t->insert([
+            ['code' => uniqid(), 'name' => '柚子', 'price' => 5.1,],
+            ['code' => uniqid(), 'name' => '柚子', 'price' => 5.2,],
+            ['code' => uniqid(), 'name' => '柚子', 'price' => 5.3,],
+        ]);
+        $this->assertEquals(3, $result);
+
+        // insertMany
+        $result = $t->insertMany([
+            ['code' => uniqid(), 'name' => '葡萄', 'price' => 8.1,],
+            ['code' => uniqid(), 'name' => '葡萄', 'price' => 8.2,],
+            ['code' => uniqid(), 'name' => '葡萄', 'price' => 8.3,],
+        ]);
+        $this->assertEquals(3, $result);
     }
 }

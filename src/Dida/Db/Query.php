@@ -130,21 +130,6 @@ class Query
 
 
     /**
-     * 设置一个verb。
-     *
-     * @param string $verb
-     */
-    public function verb($verb)
-    {
-        $verb = trim($verb);
-        $verb = strtoupper($verb);
-        $this->tasklist['verb'] = $verb;
-
-        return $this;
-    }
-
-
-    /**
      * build查询所需的SQL语句
      *
      * @return
@@ -154,12 +139,18 @@ class Query
      *          'parameters' => ...,
      *      ]
      */
-    public function build()
+    public function build($verb = null)
     {
         // 获取 Builder 对象
         $builder = $this->db->getBuilder();
         if ($builder === null) {
             throw new Exception('Builder实例未指定');
+        }
+
+        if (is_string($verb)) {
+            $verb = trim($verb);
+            $verb = strtoupper($verb);
+            $this->tasklist['verb'] = $verb;
         }
 
         // build
@@ -1053,26 +1044,35 @@ class Query
     /**
      * INSERT
      */
-    public function insert(array $data = null)
+    public function insert(array $data = [])
     {
         $data_type = $this->getArrayType($data);
-
-        // 空数组
-        if ($arrayType === 0) {
-            return 0;
+        switch ($data_type) {
+            case 0:  // 空数组
+                return 0;
+            case -1:  // 索引数组
+                return $this->insertMany($data);
+            case 2:  // 关联数组
+                return $this->insertOne($data);
         }
     }
 
 
     /**
-     * 插入一条记录
+     * 插入一条记录，返回影响的行数。
      *
      * @param array $record
      */
     public function insertOne(array $record)
     {
-        if ($this->getArrayType($record) !== 2) {
-            throw new Exception('类型不正确');
+        // 空数组，无需插入
+        if (empty($record)) {
+            return 0;
+        }
+
+        // 不是关联数组
+        if (!$this->isAssociateArray($record)) {
+            return false;
         }
 
         // 保存record
@@ -1089,8 +1089,56 @@ class Query
     }
 
 
+    /**
+     * 插入多条记录，返回影响的行数。
+     *
+     * @param array $records
+     */
     public function insertMany(array $records)
     {
+        // 空数组，无需插入
+        if (empty($records)) {
+            return 0;
+        }
+
+        // 不是索引数组
+        if (!$this->isIndexedArray($records)) {
+            return false;
+        }
+
+        // 准备连接
+        $conn = $this->db->getConnection();
+
+        $last_keys = [];
+        $last_statement = null;
+        $rowsAffected = 0;
+        foreach ($records as $record) {
+            if ($last_keys !== array_keys($record)) {
+                $this->tasklist['record'] = $record;
+                $this->tasklist['verb'] = 'INSERT';
+                $sql = $this->build();
+                $last_statement = $sql['statement'];
+                $last_keys = array_keys($record);
+                $values = array_values($record);
+                print_r($last_statement);
+                $result = $conn->executeWrite($last_statement, $values);
+                echo \Dida\Debug\Debug::varDump($result, $conn->errorInfo());
+                if (is_int($result)) {
+                    $rowsAffected += $result;
+                }
+                continue;
+            } else {
+                $values = array_values($record);
+                $result = $conn->executeWrite($last_statement, $values);
+                if (is_int($result)) {
+                    $rowsAffected += $result;
+                }
+                continue;
+            }
+        }
+
+        // 返回
+        return $rowsAffected;
     }
 
 
@@ -1269,5 +1317,39 @@ class Query
         } else {
             return -1;
         }
+    }
+
+
+    /**
+     * 是否是纯粹关联数组
+     *
+     * @param array $array
+     */
+    protected function isAssociateArray(array $array)
+    {
+        foreach ($array as $key => $item) {
+            if (is_int($key)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    /**
+     * 是否是索引数组
+     *
+     * @param array $array
+     */
+    protected function isIndexedArray(array $array)
+    {
+        foreach ($array as $key => $item) {
+            if (!is_int($key)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
