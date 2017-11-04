@@ -80,7 +80,7 @@ class Builder
     /**
      * 支持的操作符集合
      */
-    protected static $opertor_set = [
+    public static $opertor_set = [
         /* Raw SQL */
         'RAW' => 'RAW', //
 

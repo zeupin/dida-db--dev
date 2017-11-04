@@ -120,9 +120,6 @@ class Query
     {
         $this->tasklist = $this->taskbase;
 
-        $this->initWhere();
-        $this->initHaving();
-
         return $this;
     }
 
@@ -290,25 +287,114 @@ class Query
     /**
      * 在 whereTree 的当前节点添加一个 where 条件
      *
-     * @param string|array $condition
-     * @param array $data
+     * 【标准模式】
+     * @declare where(string $col_expr, string $op)
+     * @declare where(string $col_expr, string $op, mixed $data)
+     * @declare where(string $col_expr, string $op, mixed $data1, mixed $data2)
+     *
+     * 【RAW模式】 直接给出表达式
+     * @declare where(string $condition)
+     * @declare where(string $condition, array $parameters)
+     *
+     * 【匹配模式】 关联数组，参见 whereMatch()
+     * @declare where(array $match)
+     * @declare where(array $match, string $logic)
+     * @declare where(array $match, string $logic, string $name)
+     *
+     * 【专业模式】 索引数组：[列表达式，操作符，数据，数据]
+     * @declare where(array $condition)
      *
      * @return $this
      */
-    public function where($condition, array $data = [])
+    public function where()
     {
         // 初始化 [where]
         $this->initWhere();
 
-        if (is_string($condition)) {
-            $this->whereActive->items[] = [$condition, 'RAW', $data];
+        // 生成参数变量
+        $cnt = func_num_args();
+        switch ($cnt) {
+            case 4:
+                $arg4 = func_get_arg(3);
+            case 3:
+                $arg3 = func_get_arg(2);
+            case 2:
+                $arg2 = func_get_arg(1);
+                $arg2_is_array = is_array($arg2);
+                $arg2_is_string = is_string($arg2);
+            case 1:
+                $arg1 = func_get_arg(0);
+                $arg1_is_array = is_array($arg1);
+                $arg1_is_string = is_string($arg1);
+                if ($arg1_is_array) {
+                    $arg1_array_type = $this->getArrayType($arg1);
+                }
         }
 
-        if (is_array($condition)) {
-            $this->whereActive->items[] = $condition;
+        /*
+         * 【标准模式】
+         * @declare where(string $col_expr, string $op)
+         * @declare where(string $col_expr, string $op, mixed $data)
+         * @declare where(string $col_expr, string $op, mixed $data1, mixed $data2)
+         */
+        if ($cnt > 1 && $arg1_is_string && $arg2_is_string) {
+            switch ($cnt) {
+                case 2:
+                    $this->whereActive->items[] = [$arg1, $arg2];
+                    return $this;
+                case 3:
+                    $this->whereActive->items[] = [$arg1, $arg2, $arg3];
+                    return $this;
+                case 4:
+                    $this->whereActive->items[] = [$arg1, $arg2, $arg3, $arg4];
+                    return $this;
+            }
         }
 
-        return $this;
+        /*
+         * 【RAW模式】 直接给出表达式
+         * @declare where(string $condition)
+         * @declare where(string $condition, array $parameters)
+         */
+        if ($arg1_is_string) {
+            if ($cnt == 1) {
+                $this->whereActive->items[] = [$arg1, 'RAW', []];
+                return $this;
+            } elseif ($cnt == 2 && is_array($arg2)) {
+                $this->whereActive->items[] = [$arg1, 'RAW', $arg2];
+                return $this;
+            }
+        }
+
+        /*
+         * 【匹配模式】 关联数组，参见 whereMatch()
+         * @declare where(array $match)
+         * @declare where(array $match, string $logic)
+         * @declare where(array $match, string $logic, string $name)
+         */
+        if ($arg1_is_array && ($arg1_array_type == 2)) {
+            if ($cnt == 1) {
+                return $this->whereMatch($arg1);
+            } elseif ($cnt == 2 && $arg2_is_string) {
+                return $this->whereMatch($arg1, $arg2);
+            } elseif ($cnt == 3 && $arg2_is_string && is_string($arg3)) {
+                return $this->whereMatch($arg1, $arg2, $arg3);
+            }
+        }
+
+        /*
+         * 【专业模式】 索引数组：[列表达式，操作符，数据，数据]
+         * @declare where(array $condition)
+         */
+        if ($arg1_is_array && ($arg1_array_type == -1)) {
+            $this->whereActive->items[] = $arg1;
+            return $this;
+        }
+
+        /**
+         * 如果上面模式都不匹配，则抛异常
+         */
+        throw new Exception('非法的where条件');
     }
 
 
@@ -329,7 +415,7 @@ class Query
         // 检查命名有无重复
         if (is_string($name)) {
             if (array_key_exists($name, $this->whereDict)) {
-                throw new Exception("重复定义HAVING命名组");
+                throw new Exception("重复定义 where 命名组");
             }
         }
 
@@ -438,25 +524,114 @@ class Query
     /**
      * 在 havingTree 的当前节点添加一个 having 条件
      *
-     * @param string|array $condition
-     * @param array $data
+     * 【标准模式】
+     * @declare having(string $col_expr, string $op)
+     * @declare having(string $col_expr, string $op, mixed $data)
+     * @declare having(string $col_expr, string $op, mixed $data1, mixed $data2)
+     *
+     * 【RAW模式】 直接给出表达式
+     * @declare having(string $condition)
+     * @declare having(string $condition, array $parameters)
+     *
+     * 【匹配模式】 关联数组，参见 havingMatch()
+     * @declare having(array $match)
+     * @declare having(array $match, string $logic)
+     * @declare having(array $match, string $logic, string $name)
+     *
+     * 【专业模式】 索引数组：[列表达式，操作符，数据，数据]
+     * @declare having(array $condition)
      *
      * @return $this
      */
-    public function having($condition, array $data = [])
+    public function having()
     {
         // 初始化 [having]
         $this->initHaving();
 
-        if (is_string($condition)) {
-            $this->havingActive->items[] = [$condition, 'RAW', $data];
+        // 先先生成变量清单
+        $cnt = func_num_args();
+        switch ($cnt) {
+            case 4:
+                $arg4 = func_get_arg(3);
+            case 3:
+                $arg3 = func_get_arg(2);
+            case 2:
+                $arg2 = func_get_arg(1);
+                $arg2_is_array = is_array($arg2);
+                $arg2_is_string = is_string($arg2);
+            case 1:
+                $arg1 = func_get_arg(0);
+                $arg1_is_array = is_array($arg1);
+                $arg1_is_string = is_string($arg1);
+                if ($arg1_is_array) {
+                    $arg1_array_type = $this->getArrayType($arg1);
+                }
         }
 
-        if (is_array($condition)) {
-            $this->havingActive->items[] = $condition;
+        /*
+         * 【标准模式】
+         * @declare having(string $col_expr, string $op)
+         * @declare having(string $col_expr, string $op, mixed $data)
+         * @declare having(string $col_expr, string $op, mixed $data1, mixed $data2)
+         */
+        if ($cnt > 2 && $arg1_is_string && $arg2_is_string) {
+            switch ($cnt) {
+                case 2:
+                    $this->havingActive->items[] = [$arg1, $arg2];
+                    return $this;
+                case 3:
+                    $this->havingActive->items[] = [$arg1, $arg2, $arg3];
+                    return $this;
+                case 4:
+                    $this->havingActive->items[] = [$arg1, $arg2, $arg3, $arg4];
+                    return $this;
+            }
         }
 
-        return $this;
+        /*
+         * 【RAW模式】 直接给出表达式
+         * @declare having(string $condition)
+         * @declare having(string $condition, array $parameters)
+         */
+        if ($arg1_is_string) {
+            if ($cnt == 1) {
+                $this->havingActive->items[] = [$arg1, 'RAW', []];
+                return $this;
+            } elseif ($cnt == 2 && is_array($arg2)) {
+                $this->havingActive->items[] = [$arg1, 'RAW', $arg2];
+                return $this;
+            }
+        }
+
+        /*
+         * 【匹配模式】 关联数组，参见 havingMatch()
+         * @declare having(array $match)
+         * @declare having(array $match, string $logic)
+         * @declare having(array $match, string $logic, string $name)
+         */
+        if ($arg1_is_array && ($arg1_array_type == 2)) {
+            if ($cnt == 1) {
+                return $this->havingMatch($arg1);
+            } elseif ($cnt == 2 && $arg2_is_string) {
+                return $this->havingMatch($arg1, $arg2);
+            } elseif ($cnt == 3 && $arg2_is_string && is_string($arg3)) {
+                return $this->havingMatch($arg1, $arg2, $arg3);
+            }
+        }
+
+        /*
+         * 【专业模式】 索引数组：[列表达式，操作符，数据，数据]
+         * @declare having(array $condition)
+         */
+        if ($arg1_is_array && ($arg1_array_type == -1)) {
+            $this->havingActive->items[] = $arg1;
+            return $this;
+        }
+
+        /**
+         * 如果上面模式都不匹配，则抛异常
+         */
+        throw new Exception('非法的having条件');
     }
 
 
@@ -733,8 +908,6 @@ class Query
     {
         $this->initArrayItem('set');
 
-
-
         if (is_string($column)) {
             $this->tasklist['set'][$column] = [
                 'type'   => 'value',
@@ -798,8 +971,6 @@ class Query
     public function setFromTable($column, $tableB, $columnB, $colA, $colB, $checkExistsInWhere = true)
     {
         $this->initArrayItem('set');
-
-
 
         $this->tasklist['set'][$column] = [
             'type'               => 'from_table',
@@ -882,12 +1053,30 @@ class Query
     /**
      * INSERT
      */
-    public function insert(array $record = null)
+    public function insert(array $data = null)
     {
-        // 数据
-        if (is_array($record)) {
-            $this->record($record);
+        $data_type = $this->getArrayType($data);
+
+        // 空数组
+        if ($arrayType === 0) {
+            return 0;
         }
+    }
+
+
+    /**
+     * 插入一条记录
+     *
+     * @param array $record
+     */
+    public function insertOne(array $record)
+    {
+        if ($this->getArrayType($record) !== 2) {
+            throw new Exception('类型不正确');
+        }
+
+        // 保存record
+        $this->record($record);
 
         // 准备连接
         $conn = $this->db->getConnection();
@@ -897,6 +1086,11 @@ class Query
         $sql = $this->build();
         $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
         return $rowsAffected;
+    }
+
+
+    public function insertMany(array $records)
+    {
     }
 
 
@@ -1034,6 +1228,46 @@ class Query
         } else {
             $this->havingDict = [];
             $this->havingActive = null;
+        }
+    }
+
+
+    /**
+     * 检查一个数组的类型是空数组、索引数组、混杂关联数组或纯粹关联数组。
+     *
+     * 规则是：
+     * 空数组返回 0
+     * 所有的keys都是整数的就是索引数组，返回 -1
+     * 既有整数key，又有非整数key的，就是混杂关联数组，返回 1
+     * 所有的keys都是非整数的就是纯粹关联数组，返回 2
+     *
+     * @param array $array
+     *
+     * @return int 0 空数组，-1 索引数组，1 混杂关联数组，2 纯粹关联数组
+     */
+    protected function getArrayType(array $array)
+    {
+        // 如果是空数组，返回0
+        if (empty($array)) {
+            return 0;
+        }
+
+        // 检查所有的keys
+        $num = false;
+        $nan = false; // Not a Number
+        foreach ($array as $key => $item) {
+            if (is_int($key)) {
+                $num = true;
+            } else {
+                $nan = true;
+            }
+        }
+
+        // 返回
+        if ($nan) {
+            return ($num) ? 1 : 2;
+        } else {
+            return -1;
         }
     }
 }
