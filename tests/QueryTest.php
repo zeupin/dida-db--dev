@@ -279,11 +279,11 @@ EOT;
 
         // 插入多条记录
         $result = $t->insert([
-            ['code' => uniqid(), 'name' => '柚子', 'price' => 5.1,],
-            ['code' => uniqid(), 'name' => '柚子', 'price' => 5.2,],
-            ['code' => uniqid(), 'name' => '柚子', 'price' => 5.3,],
+            ['code' => 'a1', 'name' => '柚子', 'price' => 5.1,],
+            ['code' => 'a1', 'name' => '柚子', 'price' => 5.2,], // 测试code重复
+            ['code' => 'a3', 'name' => '柚子', 'price' => 5.3,],
         ]);
-        $this->assertEquals(3, $result);
+        $this->assertEquals(2, $result);
 
         // insertMany
         $result = $t->insertMany([

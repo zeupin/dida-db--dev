@@ -1042,7 +1042,7 @@ class Query
 
 
     /**
-     * INSERT
+     * INSERT 一条或者多条记录
      */
     public function insert(array $data = [])
     {
