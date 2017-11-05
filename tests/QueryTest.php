@@ -304,7 +304,7 @@ EOT;
 
         // insertMany 的错误清单
         $result = $t->insertMany([
-            ['code' => 'apple', 'name' => '菠萝', 'price' => 8.1,],  // 应该执行失败
+            ['code' => 'apple', 'name' => '菠萝', 'price' => 8.1,], // 应该执行失败
             ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.2,],
             ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.3,],
             ], Query::INSERT_MANY_RETURN_FAIL_LIST);
@@ -312,12 +312,13 @@ EOT;
 
         // insertMany 的错误详细报告
         $result = $t->insertMany([
-            ['code' => 'apple', 'name' => '菠萝', 'price' => 8.1,],  // 应该执行失败
+            ['code' => 'apple', 'name' => '菠萝', 'price' => 8.1,], // 应该执行失败
             ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.2,],
             ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.3,],
             ], Query::INSERT_MANY_RETURN_FAIL_REPORT);
         print_r($result);
     }
+
 
     public function test_insertOrUpdate()
     {
@@ -379,6 +380,6 @@ EOT;
         ];
         $result = $t->insertOrUpdateMany($records, 'id');
         print_r($result);
-        $this->assertEquals([3], $result['succ']);
+        $this->assertEquals([3 => null], $result['succ']);
     }
 }

@@ -1338,7 +1338,7 @@ class Query
             // 如果插入成功
             $result = $stmtInsert->execute($values);
             if ($result && $stmtInsert->rowCount() > 0) {
-                $succ[] = $seq;
+                $succ[$seq] = null;
                 continue;
             }
 
@@ -1350,12 +1350,12 @@ class Query
             $stmtUpdate = $pdo->prepare($sql['statement']);
             $result = $stmtUpdate->execute($sql['parameters']);
             if ($result && $stmtUpdate->rowCount() > 0) {
-                $succ[] = $seq;
+                $succ[$seq] = null;
                 continue;
             }
 
             // INSERT 和 UPDATE 都失败
-            $fail[] = $seq;
+            $fail[$seq] = null;
         }
 
         return [
