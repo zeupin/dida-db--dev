@@ -127,7 +127,6 @@ class Query
 
     private function _________________________INIT()
     {
-
     }
 
 
@@ -146,7 +145,6 @@ class Query
 
     private function _________________________BUILD()
     {
-
     }
 
 
@@ -181,7 +179,6 @@ class Query
 
     private function _________________________TABLE()
     {
-
     }
 
 
@@ -210,7 +207,6 @@ class Query
 
     private function _________________________COLUMNLIST()
     {
-
     }
 
 
@@ -279,7 +275,6 @@ class Query
 
     private function _________________________WHERE()
     {
-
     }
 
 
@@ -517,7 +512,6 @@ class Query
 
     private function _________________________HAVING()
     {
-
     }
 
 
@@ -755,7 +749,6 @@ class Query
 
     private function _________________________JOINS()
     {
-
     }
 
 
@@ -837,7 +830,6 @@ class Query
 
     private function _________________________GROUPBY_ORDERBY_LIMIT()
     {
-
     }
 
 
@@ -892,7 +884,6 @@ class Query
 
     private function _________________________INSERT()
     {
-
     }
 
 
@@ -911,7 +902,6 @@ class Query
 
     private function _________________________UPDATE()
     {
-
     }
 
 
@@ -1042,7 +1032,6 @@ class Query
 
     private function _________________________EXECUTIONS()
     {
-
     }
 
 
@@ -1271,11 +1260,16 @@ class Query
         $table = $this->tasklist['table'];
         $this->table($table['name'], $table['prefix']);
 
+        // 获取连接
+        $pdo = $this->db->getConnection()->getPDO();
+
         // 插入本条记录
-        $insert_result = $this->insertOne($record);
+        $sql = $this->record($record)->build('INSERT');
+        $stmt = $pdo->prepare($sql['statement']);
+        $result = $stmt->execute($sql['parameters']);
 
         // 如果插入成功
-        if (is_int($insert_result)) {
+        if ($result) {
             return true;
         }
 
@@ -1295,7 +1289,7 @@ class Query
     /**
      * 主键不存在就插入，主键已存在就更新。
      *
-     * @param array $data
+     * @param array $records
      * @param string $pri_col 主键的列名
      *
      * @return array 执行结果报告
@@ -1306,7 +1300,50 @@ class Query
      */
     public function insertOrUpdateMany(array $records, $pri_col)
     {
+        $succ = [];
+        $fail = [];
 
+        $last_keys = null;
+        $stmtInsert = null;
+
+        // 获取连接
+        $pdo = $this->db->getConnection()->getPDO();
+
+        // 逐个记录处理
+        foreach ($records as $seq => $record) {
+            // 尝试进行 INSERT
+            $this_keys = array_keys($record);
+            $values = array_values($record);
+            if ($this_keys !== $last_keys) {
+                $sql = $this->record($record)->build('INSERT');
+                $stmtInsert = $pdo->prepare($sql['statement']);
+                $last_keys = $this_keys;
+            }
+
+            // 如果插入成功
+            $result = $stmtInsert->execute($values);
+            if ($result) {
+                $succ[$seq] = 0;
+                continue;
+            }
+
+            // 尝试进行 UPDATE
+            $sql = $this->where($pri_col, '=', $record[$pri_col])->build('update');
+            $stmtUpdate = $pdo->prepare($sql['statement']);
+            $result = $stmtUpdate->execute($sql['parameters']);
+            if ($result) {
+                $succ[$seq] = 0;
+                continue;
+            }
+
+            // INSERT 和 UPDATE 都失败
+            $fail[$seq] = '';
+        }
+
+        return [
+            'succ' => $succ,
+            'fail' => $fail,
+        ];
     }
 
 
@@ -1376,7 +1413,6 @@ class Query
 
     private function _________________________UTILITIES()
     {
-
     }
 
 
