@@ -143,6 +143,18 @@ class Query
     }
 
 
+    /**
+     * 只保留 taskbase 里面的条目和 table 条目,其它条目全部删除
+     */
+    public function clear()
+    {
+        $table = $this->tasklist['table'];
+        $this->table($table['name'], $table['prefix']);
+
+        return $this;
+    }
+
+
     private function _________________________BUILD()
     {
     }
@@ -926,7 +938,7 @@ class Query
             ];
         } elseif (is_array($column)) {
             foreach ($column as $key => $value) {
-                $this->tasklist['set'][$column] = [
+                $this->tasklist['set'][$key] = [
                     'type'   => 'value',
                     'column' => $key,
                     'value'  => $value,
@@ -1257,8 +1269,7 @@ class Query
     public function insertOrUpdateOne(array $record, $pri_col)
     {
         // 重置 Query
-        $table = $this->tasklist['table'];
-        $this->table($table['name'], $table['prefix']);
+        $this->clear();
 
         // 获取连接
         $pdo = $this->db->getConnection()->getPDO();
@@ -1273,15 +1284,19 @@ class Query
             return true;
         }
 
-        // 插入失败，准备更新
-        $result = $this->where($pri_col, '=', $record[$pri_col])
+        // 尝试更新
+        $this->clear();
+        $sql = $this->where($pri_col, '=', $record[$pri_col])
             ->setValue($record)
-            ->update();
+            ->build('UPDATE');
+        $stmt = $pdo->prepare($sql['statement']);
+        $result = $stmt->execute($sql['parameters']);
 
-        if ($result === false) {
-            return false;
-        } else {
+        // 如果更新成功，返回true，否则返回false
+        if ($result && $stmt->rowCount()) {
             return true;
+        } else {
+            return false;
         }
     }
 
@@ -1322,22 +1337,25 @@ class Query
 
             // 如果插入成功
             $result = $stmtInsert->execute($values);
-            if ($result) {
-                $succ[$seq] = 0;
+            if ($result && $stmtInsert->rowCount() > 0) {
+                $succ[] = $seq;
                 continue;
             }
 
             // 尝试进行 UPDATE
-            $sql = $this->where($pri_col, '=', $record[$pri_col])->build('update');
+            $this->clear();
+            $sql = $this->where($pri_col, '=', $record[$pri_col])
+                ->setValue($record)
+                ->build('UPDATE');
             $stmtUpdate = $pdo->prepare($sql['statement']);
             $result = $stmtUpdate->execute($sql['parameters']);
-            if ($result) {
-                $succ[$seq] = 0;
+            if ($result && $stmtUpdate->rowCount() > 0) {
+                $succ[] = $seq;
                 continue;
             }
 
             // INSERT 和 UPDATE 都失败
-            $fail[$seq] = '';
+            $fail[] = $seq;
         }
 
         return [

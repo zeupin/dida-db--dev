@@ -294,7 +294,7 @@ EOT;
         ]);
         $this->assertEquals(3, $result);
 
-        // insertMany
+        // insertMany 的成功清单
         $result = $t->insertMany([
             ['code' => uniqid(), 'name' => '枇杷', 'price' => 8.1,],
             ['code' => uniqid(), 'name' => '枇杷', 'price' => 8.2,],
@@ -302,7 +302,7 @@ EOT;
             ], Query::INSERT_MANY_RETURN_SUCC_LIST);
         print_r($result);
 
-        // insertMany
+        // insertMany 的错误清单
         $result = $t->insertMany([
             ['code' => 'apple', 'name' => '菠萝', 'price' => 8.1,],  // 应该执行失败
             ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.2,],
@@ -310,12 +310,75 @@ EOT;
             ], Query::INSERT_MANY_RETURN_FAIL_LIST);
         print_r($result);
 
-        // insertMany
+        // insertMany 的错误详细报告
         $result = $t->insertMany([
             ['code' => 'apple', 'name' => '菠萝', 'price' => 8.1,],  // 应该执行失败
             ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.2,],
             ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.3,],
             ], Query::INSERT_MANY_RETURN_FAIL_REPORT);
         print_r($result);
+    }
+
+    public function test_insertOrUpdate()
+    {
+        $this->resetMock(__DIR__ . '/zp_test.sql');
+
+        $record = ['code' => uniqid(), 'name' => '香蕉', 'price' => 5.2,];
+
+        $t = $this->db->table('test');
+
+        // 插入多条记录
+        $result = $t->insertMany([
+            ['id' => 101, 'code' => 'a1', 'name' => '柚子', 'price' => 5.1,],
+            ['id' => 102, 'code' => 'a2', 'name' => '柚子', 'price' => 5.2,],
+            ['id' => 103, 'code' => 'a3', 'name' => '柚子', 'price' => 5.3,],
+        ]);
+
+        // insertOrUpdateOne
+        $t = $this->db->table('test');
+        $result = $t->insertOrUpdateOne(
+            ['id' => 104, 'code' => 'a4', 'name' => '柚子', 'price' => 5.4,], 'id');
+        $this->assertTrue($result);
+
+        // insertOrUpdateOne 失败
+        $t = $this->db->table('test');
+        $result = $t->insertOrUpdateOne(
+            ['id' => 105, 'code' => 'a4', 'name' => '柚子', 'price' => 5.4,], 'id'); //code冲突
+        $this->assertFalse($result);
+
+        // many
+        $t = $this->db->table('test');
+        $records = [
+            ['id' => 201, 'code' => '201', 'name' => '西瓜', 'price' => 9.1,],
+            ['id' => 202, 'code' => '202', 'name' => '西瓜', 'price' => 9.2,],
+            ['id' => 203, 'code' => '203', 'name' => '西瓜', 'price' => 9.3,],
+            ['id' => 101, 'code' => 'a1', 'name' => '柚子', 'price' => 10.1,],
+        ];
+        $result = $t->insertOrUpdateMany($records, 'id');
+        print_r($result);
+
+        // many
+        $t = $this->db->table('test');
+        $records = [
+            ['id' => 201, 'code' => '201', 'name' => '桂圆', 'price' => 7.1,],
+            ['id' => 202, 'code' => '202', 'name' => '桂圆', 'price' => 7.2,],
+            ['id' => 203, 'code' => '203', 'name' => '桂圆', 'price' => 7.3,],
+            ['id' => 204, 'code' => '204', 'name' => '桂圆', 'price' => 7.4,],
+        ];
+        $result = $t->insertOrUpdateMany($records, 'id');
+        print_r($result);
+        $this->assertEmpty($result['fail']);
+
+        // many
+        $t = $this->db->table('test');
+        $records = [
+            ['id' => 301, 'code' => '201', 'name' => '301', 'price' => 7.1,],
+            ['id' => 302, 'code' => '202', 'name' => '301', 'price' => 7.2,],
+            ['id' => 303, 'code' => '203', 'name' => '301', 'price' => 7.3,],
+            ['id' => 304, 'code' => '304', 'name' => '301', 'price' => 7.4,],
+        ];
+        $result = $t->insertOrUpdateMany($records, 'id');
+        print_r($result);
+        $this->assertEquals([3], $result['succ']);
     }
 }
