@@ -127,6 +127,7 @@ class Query
 
     private function _________________________INIT()
     {
+
     }
 
 
@@ -145,6 +146,7 @@ class Query
 
     private function _________________________BUILD()
     {
+
     }
 
 
@@ -179,6 +181,7 @@ class Query
 
     private function _________________________TABLE()
     {
+
     }
 
 
@@ -207,6 +210,7 @@ class Query
 
     private function _________________________COLUMNLIST()
     {
+
     }
 
 
@@ -275,6 +279,7 @@ class Query
 
     private function _________________________WHERE()
     {
+
     }
 
 
@@ -512,6 +517,7 @@ class Query
 
     private function _________________________HAVING()
     {
+
     }
 
 
@@ -749,6 +755,7 @@ class Query
 
     private function _________________________JOINS()
     {
+
     }
 
 
@@ -830,6 +837,7 @@ class Query
 
     private function _________________________GROUPBY_ORDERBY_LIMIT()
     {
+
     }
 
 
@@ -884,6 +892,7 @@ class Query
 
     private function _________________________INSERT()
     {
+
     }
 
 
@@ -902,6 +911,7 @@ class Query
 
     private function _________________________UPDATE()
     {
+
     }
 
 
@@ -1032,6 +1042,7 @@ class Query
 
     private function _________________________EXECUTIONS()
     {
+
     }
 
 
@@ -1139,10 +1150,11 @@ class Query
         $fail_report = [];
 
         // 准备连接
-        $conn = $this->db->getConnection();
+        $pdo = $this->db->getConnection()->getPDO();
 
-        $last_keys = [];
+        $last_keys = null;
         $last_statement = null;
+        $stmt = null;
 
         foreach ($records as $seq => $record) {
             // 本条记录的keys列表
@@ -1157,21 +1169,28 @@ class Query
                 $last_keys = $this_keys;
                 $values = array_values($record);
 
+                // prepare
+                $stmt = $pdo->prepare($last_statement);
+                if ($stmt === false) {
+                    $last_keys = null;
+                    continue;
+                }
+
                 // 执行，返回成功的条数
-                $result = $conn->executeWrite($last_statement, $values);
+                $result = $stmt->execute($values);
 
                 // 统计
-                if (is_int($result)) {
-                    $succ_count ++;
+                if ($result) {
+                    $succ_count++;
                     if ($returnType === self::INSERT_MANY_RETURN_SUCC_LIST) {
-                        $succ_list[$seq] = $conn->getPDO()->lastInsertId();
+                        $succ_list[$seq] = $pdo->lastInsertId();
                     }
                 } else {
-                    $fail_count ++;
+                    $fail_count++;
                     if ($returnType === self::INSERT_MANY_RETURN_FAIL_LIST) {
-                        $fail_list[$seq] = $conn->errorCode();
+                        $fail_list[$seq] = $pdo->errorCode();
                     } elseif ($returnType === self::INSERT_MANY_RETURN_FAIL_REPORT) {
-                        $fail_report[$seq] = $conn->errorInfo();
+                        $fail_report[$seq] = $pdo->errorInfo();
                     }
                 }
 
@@ -1181,21 +1200,21 @@ class Query
                 // 如果 $this_keys 和上次一样，则直接用已经build好的statement
                 $values = array_values($record);
 
-                // 执行，返回成功的条数
-                $result = $conn->executeWrite($last_statement, $values);
+                // 执行
+                $result = $stmt->execute($values);
 
                 // 统计
-                if (is_int($result)) {
-                    $succ_count ++;
+                if ($result) {
+                    $succ_count++;
                     if ($returnType === self::INSERT_MANY_RETURN_SUCC_LIST) {
-                        $succ_list[$seq] = $conn->getPDO()->lastInsertId();
+                        $succ_list[$seq] = $pdo->lastInsertId();
                     }
                 } else {
-                    $fail_count ++;
+                    $fail_count++;
                     if ($returnType === self::INSERT_MANY_RETURN_FAIL_LIST) {
-                        $fail_list[] = $seq;
+                        $fail_list[$seq] = $pdo->errorCode();
                     } elseif ($returnType === self::INSERT_MANY_RETURN_FAIL_REPORT) {
-                        $fail_report[$seq] = $conn->errorInfo();
+                        $fail_report[$seq] = $pdo->errorInfo();
                     }
                 }
 
@@ -1222,21 +1241,72 @@ class Query
 
     /**
      * UPDATE
+     *
+     * @return int|false 成功，返回影响条数；失败，返回false。
      */
     public function update()
     {
-        $this->tasklist['verb'] = 'UPDATE';
+        // 准备连接
+        $conn = $this->db->getConnection();
+
+        $sql = $this->build('UPDATE');
+
+        $result = $conn->executeWrite($sql['statement'], $sql['parameters']);
+
+        return $result;
     }
 
 
     /**
-     * id不存在就插入，id存在就更新
+     * 主键不存在就插入，主键已存在就更新。
      *
      * @param array $data
-     * @param string $col_id id列的列名
+     * @param string $pri_col 主键的列名
+     *
+     * @return boolean  成功返回true，失败返回false
      */
-    public function insertOrUpdate(array $data, $col_id)
+    public function insertOrUpdateOne(array $record, $pri_col)
     {
+        // 重置 Query
+        $table = $this->tasklist['table'];
+        $this->table($table['name'], $table['prefix']);
+
+        // 插入本条记录
+        $insert_result = $this->insertOne($record);
+
+        // 如果插入成功
+        if (is_int($insert_result)) {
+            return true;
+        }
+
+        // 插入失败，准备更新
+        $result = $this->where($pri_col, '=', $record[$pri_col])
+            ->setValue($record)
+            ->update();
+
+        if ($result === false) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
+    /**
+     * 主键不存在就插入，主键已存在就更新。
+     *
+     * @param array $data
+     * @param string $pri_col 主键的列名
+     *
+     * @return array 执行结果报告
+     * [
+     *     'succ' => [], // 执行成功的序号列表
+     *     'fail' => [], // 执行失败的序号列表
+     * ]
+     */
+    public function insertOrUpdateMany(array $records, $pri_col)
+    {
+
     }
 
 
@@ -1306,6 +1376,7 @@ class Query
 
     private function _________________________UTILITIES()
     {
+
     }
 
 
