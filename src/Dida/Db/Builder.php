@@ -256,7 +256,6 @@ class Builder
         $STMT = [
             "UPDATE\n    ",
             'table'   => &$this->ST['table'],
-            "\nSET\n    ",
             'set'     => &$this->ST['set'],
             'join'    => &$this->ST['join'],
             'where'   => &$this->ST['where'],
