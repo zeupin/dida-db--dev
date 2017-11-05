@@ -18,6 +18,12 @@ class Query
      */
     const VERSION = '0.1.5';
 
+    /*
+     * 插入后的返回类型
+     */
+    const INSERT_RETURN_COUNT = 1;  // 返回成功的条数
+    const INSERT_RETURN_ID = 2;  // 返回 lastInsertId
+
     /**
      * @var \Dida\Db\Db
      */
@@ -52,6 +58,8 @@ class Query
         'prefix'      => '',
         'swap_prefix' => '###_',
     ];
+
+
 
     /**
      * 指向当前的 whereTree 节点。
@@ -1042,28 +1050,12 @@ class Query
 
 
     /**
-     * INSERT 一条或者多条记录
-     */
-    public function insert(array $data = [])
-    {
-        $data_type = $this->getArrayType($data);
-        switch ($data_type) {
-            case 0:  // 空数组
-                return 0;
-            case -1:  // 索引数组
-                return $this->insertMany($data);
-            case 2:  // 关联数组
-                return $this->insertOne($data);
-        }
-    }
-
-
-    /**
-     * 插入一条记录，返回影响的行数。
+     * 插入一条记录，返回影响的行数或insertid。
      *
      * @param array $record
+     * @param int $insertReturn  返回类型
      */
-    public function insertOne(array $record)
+    public function insertOne(array $record, $insertReturn = self::INSERT_RETURN_COUNT)
     {
         // 空数组，无需插入
         if (empty($record)) {
@@ -1085,7 +1077,13 @@ class Query
         $this->tasklist['verb'] = 'INSERT';
         $sql = $this->build();
         $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
-        return $rowsAffected;
+
+        switch ($insertReturn) {
+            case self::INSERT_RETURN_COUNT:
+                return $rowsAffected;
+            case self::INSERT_RETURN_ID:
+                return $conn->getPDO()->lastInsertId();
+        }
     }
 
 
@@ -1112,7 +1110,7 @@ class Query
         $last_keys = [];
         $last_statement = null;
         $rowsAffected = 0;
-        foreach ($records as $record) {
+        foreach ($records as $seq => $record) {
             // 本条记录的keys列表
             $this_keys = array_keys($record);
 
@@ -1159,6 +1157,17 @@ class Query
     public function update()
     {
         $this->tasklist['verb'] = 'UPDATE';
+    }
+
+
+    /**
+     * id不存在就插入，id存在就更新
+     *
+     * @param array $data
+     * @param string $col_id id列的列名
+     */
+    public function insertOrUpdate(array $data, $col_id)
+    {
     }
 
 

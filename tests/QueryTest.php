@@ -274,11 +274,11 @@ EOT;
         print_r($result);
 
         // 插入一条记录
-        $result = $t->insert($record);
+        $result = $t->insertOne($record);
         $this->assertEquals(1, $result);
 
         // 插入多条记录
-        $result = $t->insert([
+        $result = $t->insertMany([
             ['code' => 'a1', 'name' => '柚子', 'price' => 5.1,],
             ['code' => 'a1', 'name' => '柚子', 'price' => 5.2,], // 测试code重复
             ['code' => 'a3', 'name' => '柚子', 'price' => 5.3,],
