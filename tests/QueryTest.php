@@ -2,6 +2,7 @@
 
 use \PHPUnit\Framework\TestCase;
 use \Dida\Debug\Debug;
+use \Dida\Db\Query;
 
 /**
  * QueryTest
@@ -263,19 +264,19 @@ EOT;
     {
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
-        $record = [
-            'code'  => uniqid(),
-            'name'  => '香蕉',
-            'price' => 5.2,
-        ];
+        $record = ['code' => uniqid(), 'name' => '香蕉', 'price' => 5.2,];
 
         $t = $this->db->table('test');
         $result = $t->record($record)->build('INSERT');
         print_r($result);
 
         // 插入一条记录
-        $result = $t->insertOne($record);
+        $result = $t->insertOne(['code' => uniqid(), 'name' => '香蕉', 'price' => 5.2,]);
         $this->assertEquals(1, $result);
+
+        // 插入一条记录，返回id
+        $result = $t->insertOne(['code' => uniqid(), 'name' => '香蕉', 'price' => 5.3,], Query::INSERT_RETURN_ID);
+        $this->assertEquals(4, $result);
 
         // 插入多条记录
         $result = $t->insertMany([
@@ -292,5 +293,29 @@ EOT;
             ['code' => uniqid(), 'name' => '葡萄', 'price' => 8.3,],
         ]);
         $this->assertEquals(3, $result);
+
+        // insertMany
+        $result = $t->insertMany([
+            ['code' => uniqid(), 'name' => '枇杷', 'price' => 8.1,],
+            ['code' => uniqid(), 'name' => '枇杷', 'price' => 8.2,],
+            ['code' => uniqid(), 'name' => '枇杷', 'price' => 8.3,],
+            ], Query::INSERT_MANY_RETURN_SUCC_LIST);
+        print_r($result);
+
+        // insertMany
+        $result = $t->insertMany([
+            ['code' => 'apple', 'name' => '菠萝', 'price' => 8.1,],  // 应该执行失败
+            ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.2,],
+            ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.3,],
+            ], Query::INSERT_MANY_RETURN_FAIL_LIST);
+        print_r($result);
+
+        // insertMany
+        $result = $t->insertMany([
+            ['code' => 'apple', 'name' => '菠萝', 'price' => 8.1,],  // 应该执行失败
+            ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.2,],
+            ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.3,],
+            ], Query::INSERT_MANY_RETURN_FAIL_REPORT);
+        print_r($result);
     }
 }

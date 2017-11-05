@@ -19,10 +19,23 @@ class Query
     const VERSION = '0.1.5';
 
     /*
-     * 插入后的返回类型
+     * 单条插入后的返回类型
      */
     const INSERT_RETURN_COUNT = 1;  // 返回成功的条数
     const INSERT_RETURN_ID = 2;  // 返回 lastInsertId
+
+    /*
+     * 多条插入成功后的返回类型
+     */
+    const INSERT_MANY_RETURN_SUCC_COUNT = 1;    // 返回成功的条数
+    const INSERT_MANY_RETURN_SUCC_LIST = 2;     // 返回成功的序号列表，[seq => last_insert_id]
+
+    /*
+     * 多条插入失败后的返回类型
+     */
+    const INSERT_MANY_RETURN_FAIL_COUNT = -1;    // 返回成功的条数
+    const INSERT_MANY_RETURN_FAIL_LIST = -2;     // 返回失败的序号列表，[seq => errorCode]
+    const INSERT_MANY_RETURN_FAIL_REPORT = -3;   // 返回失败的报告 [id => [errorCode, errorInfo]]
 
     /**
      * @var \Dida\Db\Db
@@ -58,8 +71,6 @@ class Query
         'prefix'      => '',
         'swap_prefix' => '###_',
     ];
-
-
 
     /**
      * 指向当前的 whereTree 节点。
@@ -1079,20 +1090,35 @@ class Query
         $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
 
         switch ($insertReturn) {
+            // 返回受影响的条数
             case self::INSERT_RETURN_COUNT:
                 return $rowsAffected;
+
+            // 返回新生成的id
             case self::INSERT_RETURN_ID:
+                // 如果执行失败，返回false
+                if ($rowsAffected === false) {
+                    return false;
+                }
+
+                // 否则返回新生成的id
                 return $conn->getPDO()->lastInsertId();
         }
     }
 
 
     /**
-     * 插入多条记录，返回影响的行数。
+     * 插入多条记录
      *
      * @param array $records
+     * @param int $insertReturn  返回类型
+     *    self::INSERT_MANY_RETURN_SUCC_COUNT    执行成功的条数
+     *    self::INSERT_MANY_RETURN_SUCC_LIST     执行成功的列表
+     *    self::INSERT_MANY_RETURN_FAIL_COUNT    执行失败的条数
+     *    self::INSERT_MANY_RETURN_FAIL_LIST     执行失败的列表
+     *    self::INSERT_MANY_RETURN_FAIL_REPORT   执行失败的具体报告
      */
-    public function insertMany(array $records)
+    public function insertMany(array $records, $returnType = self::INSERT_RETURN_COUNT)
     {
         // 空数组，无需插入
         if (empty($records)) {
@@ -1104,12 +1130,20 @@ class Query
             return false;
         }
 
+        // 准备统计
+        $succ_count = 0;
+        $succ_list = [];
+
+        $fail_count = 0;
+        $fail_list = [];
+        $fail_report = [];
+
         // 准备连接
         $conn = $this->db->getConnection();
 
         $last_keys = [];
         $last_statement = null;
-        $rowsAffected = 0;
+
         foreach ($records as $seq => $record) {
             // 本条记录的keys列表
             $this_keys = array_keys($record);
@@ -1126,10 +1160,22 @@ class Query
                 // 执行，返回成功的条数
                 $result = $conn->executeWrite($last_statement, $values);
 
-                // 累加
+                // 统计
                 if (is_int($result)) {
-                    $rowsAffected += $result;
+                    $succ_count ++;
+                    if ($returnType === self::INSERT_MANY_RETURN_SUCC_LIST) {
+                        $succ_list[$seq] = $conn->getPDO()->lastInsertId();
+                    }
+                } else {
+                    $fail_count ++;
+                    if ($returnType === self::INSERT_MANY_RETURN_FAIL_LIST) {
+                        $fail_list[$seq] = $conn->errorCode();
+                    } elseif ($returnType === self::INSERT_MANY_RETURN_FAIL_REPORT) {
+                        $fail_report[$seq] = $conn->errorInfo();
+                    }
                 }
+
+                // 下一条
                 continue;
             } else {
                 // 如果 $this_keys 和上次一样，则直接用已经build好的statement
@@ -1138,16 +1184,39 @@ class Query
                 // 执行，返回成功的条数
                 $result = $conn->executeWrite($last_statement, $values);
 
-                // 累加
+                // 统计
                 if (is_int($result)) {
-                    $rowsAffected += $result;
+                    $succ_count ++;
+                    if ($returnType === self::INSERT_MANY_RETURN_SUCC_LIST) {
+                        $succ_list[$seq] = $conn->getPDO()->lastInsertId();
+                    }
+                } else {
+                    $fail_count ++;
+                    if ($returnType === self::INSERT_MANY_RETURN_FAIL_LIST) {
+                        $fail_list[] = $seq;
+                    } elseif ($returnType === self::INSERT_MANY_RETURN_FAIL_REPORT) {
+                        $fail_report[$seq] = $conn->errorInfo();
+                    }
                 }
+
+                // 下一条
                 continue;
             }
         }
 
         // 返回
-        return $rowsAffected;
+        switch ($returnType) {
+            case self::INSERT_MANY_RETURN_SUCC_COUNT:
+                return $succ_count;
+            case self::INSERT_MANY_RETURN_SUCC_LIST:
+                return $succ_list;
+            case self::INSERT_MANY_RETURN_FAIL_COUNT:
+                return $fail_count;
+            case self::INSERT_MANY_RETURN_FAIL_LIST:
+                return $fail_list;
+            case self::INSERT_MANY_RETURN_FAIL_REPORT:
+                return $fail_report;
+        }
     }
 
 
