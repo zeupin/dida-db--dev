@@ -1113,23 +1113,34 @@ class Query
         $last_statement = null;
         $rowsAffected = 0;
         foreach ($records as $record) {
-            if ($last_keys !== array_keys($record)) {
+            // 本条记录的keys列表
+            $this_keys = array_keys($record);
+
+            if ($last_keys !== $this_keys) {
+                // 如果 $this_keys 和上次不一样，则需要重新build
                 $this->tasklist['record'] = $record;
                 $this->tasklist['verb'] = 'INSERT';
                 $sql = $this->build();
                 $last_statement = $sql['statement'];
-                $last_keys = array_keys($record);
+                $last_keys = $this_keys;
                 $values = array_values($record);
-                print_r($last_statement);
+
+                // 执行，返回成功的条数
                 $result = $conn->executeWrite($last_statement, $values);
-                echo \Dida\Debug\Debug::varDump($result, $conn->errorInfo());
+
+                // 累加
                 if (is_int($result)) {
                     $rowsAffected += $result;
                 }
                 continue;
             } else {
+                // 如果 $this_keys 和上次一样，则直接用已经build好的statement
                 $values = array_values($record);
+
+                // 执行，返回成功的条数
                 $result = $conn->executeWrite($last_statement, $values);
+
+                // 累加
                 if (is_int($result)) {
                     $rowsAffected += $result;
                 }
