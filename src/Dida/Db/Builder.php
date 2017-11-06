@@ -38,14 +38,14 @@ class Builder
      *
      * @var array
      */
-    protected $globalSchemaMap = [];
+    protected $globalSchemaInfo = [];
 
     /**
      * 临时的数据库的数据表信息。
      * 只在一个build期间存在，build完了就消失了。
      * 每次build的最初，这个值就被初始化做掉了。
      */
-    protected $localSchemaMap = [];
+    protected $localSchemaInfo = [];
 
     /**
      * 任务列表
@@ -1318,7 +1318,7 @@ class Builder
 
 
     /**
-     * 登记一个数据表到 $globalSchemaMap 和 $locaSchemaMap
+     * 登记一个数据表到 $globalSchemaInfo 和 $locaSchemaInfo
      *
      * @param string $name
      * @param string $alias
@@ -1328,12 +1328,12 @@ class Builder
         // 实际的表名
         $realname = $this->util_table_with_prefix($name, $prefix);
 
-        // 如果 $globalSchemaMap 还没有这个数据表的表元数据，则先从读取表元数据
-        if (!array_key_exists($realname, $this->globalSchemaMap)) {
-            if (!$tableinfo = $this->db->getSchemaMap()->readTableInfoFromCache($realname)) {
+        // 如果 $globalSchemaInfo 还没有这个数据表的表元数据，则先从读取表元数据
+        if (!array_key_exists($realname, $this->globalSchemaInfo)) {
+            if (!$tableinfo = $this->db->getSchemaInfo()->readTableInfoFromCache($realname)) {
                 throw new Exception("数据表{$realname}的表元信息不存在");
             }
-            $this->globalSchemaMap[$realname] = $tableinfo;
+            $this->globalSchemaInfo[$realname] = $tableinfo;
         }
 
         // 限制$alias只能为字符串或者null
@@ -1342,14 +1342,14 @@ class Builder
         }
 
         // 本地info指向到全局对应的info
-        if (!isset($this->localSchemaMap[$realname])) {
-            $this->localSchemaMap[$realname] = &$this->globalSchemaMap[$realname];
+        if (!isset($this->localSchemaInfo[$realname])) {
+            $this->localSchemaInfo[$realname] = &$this->globalSchemaInfo[$realname];
         }
 
         // 本地alias的info也指向到全局对应的info
         if ($alias) {
-            if (!isset($this->localSchemaMap[$alias])) {
-                $this->localSchemaMap[$alias] = &$this->globalSchemaMap[$realname];
+            if (!isset($this->localSchemaInfo[$alias])) {
+                $this->localSchemaInfo[$alias] = &$this->globalSchemaInfo[$realname];
             }
         }
     }

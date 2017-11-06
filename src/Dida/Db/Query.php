@@ -50,11 +50,11 @@ class Query
     protected $builder = null;
 
     /**
-     * SchemaMap 实例。
+     * SchemaInfo 实例。
      *
-     * @var \Dida\Db\SchemaMap
+     * @var \Dida\Db\SchemaInfo
      */
-    protected $schemamap = null;
+    protected $schemainfo = null;
 
     /**
      * 任务清单

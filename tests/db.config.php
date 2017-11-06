@@ -12,7 +12,7 @@ return [
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_PERSISTENT         => false
     ],
-    'db.schemamap_dir' => __DIR__ . '/cache',
+    'db.schemainfo_dir' => __DIR__ . '/cache',
     'db.name'           => 'zeupin',
     'db.type'           => 'mysql',
     'db.prefix'         => 'zp_',

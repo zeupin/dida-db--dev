@@ -30,9 +30,9 @@ class Db
     protected $builder = null;
 
     /**
-     * @var \Dida\Db\SchemaMap
+     * @var \Dida\Db\SchemaInfo
      */
-    protected $schemamap = null;
+    protected $schemainfo = null;
 
     /**
      * 缺省设置
@@ -43,7 +43,7 @@ class Db
         /* 必填参数 */
         'db.name'          => null, // 数据库的名字
         'db.driver'        => null, // 数据库驱动类型,如“Mysql”
-        'db.schemamap_dir' => null, // SchemaMap的缓存目录
+        'db.schemainfo_dir' => null, // SchemaInfo的缓存目录
 
         /* pdo 相关参数 */
         'db.dsn'      => null,
@@ -151,26 +151,26 @@ class Db
 
 
     /**
-     * 设置当前的 SchemaMap 实例。
+     * 设置当前的 SchemaInfo 实例。
      *
-     * @param \Dida\Db\SchemaMap $schemamap
+     * @param \Dida\Db\SchemaInfo $schemainfo
      */
-    public function setSchemeMap($schemamap)
+    public function setSchemeMap($schemainfo)
     {
-        $this->schemamap = $schemamap;
+        $this->schemainfo = $schemainfo;
 
         return $this;
     }
 
 
     /**
-     * 返回当前的 SchemaMap 实例。
+     * 返回当前的 SchemaInfo 实例。
      *
-     * @return  \Dida\Db\SchemaMap
+     * @return  \Dida\Db\SchemaInfo
      */
-    public function &getSchemaMap()
+    public function &getSchemaInfo()
     {
-        return $this->schemamap;
+        return $this->schemainfo;
     }
 
 

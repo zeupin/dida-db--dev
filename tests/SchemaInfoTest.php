@@ -8,9 +8,9 @@ use \PHPUnit\Framework\TestCase;
 use \Dida\Debug\Debug;
 
 /**
- * SchemaMapTest
+ * SchemaInfoTest
  */
-class SchemaMapTest extends TestCase
+class SchemaInfoTest extends TestCase
 {
     /**
      * @var \Dida\Db\Db
@@ -18,9 +18,9 @@ class SchemaMapTest extends TestCase
     public $db = null;
 
     /**
-     * @var \Dida\Db\SchemaMap
+     * @var \Dida\Db\SchemaInfo
      */
-    public $schemamap = null;
+    public $schemainfo = null;
 
 
     /**
@@ -33,12 +33,12 @@ class SchemaMapTest extends TestCase
         $cfg = include(__DIR__ . "/db.config.php");
         $this->db = new \Dida\Db\Mysql\MysqlDb($cfg);
 
-        $this->schemamap = $this->db->getSchemaMap();
+        $this->schemainfo = $this->db->getSchemaInfo();
     }
 
 
     public function test_saveAllTableInfo()
     {
-        $this->schemamap->saveAllTableInfo();
+        $this->schemainfo->saveAllTableInfo();
     }
 }
