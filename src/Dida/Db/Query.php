@@ -1421,7 +1421,8 @@ class Query
             switch ($name) {
                 case 'getRow':
                 case 'getRows':
-                case "getColumn":
+                case 'getColumn':
+                case 'getValue':
                     $dataset = $this->select();
                     return call_user_func_array([$dataset, $name], $arguments);
             }
