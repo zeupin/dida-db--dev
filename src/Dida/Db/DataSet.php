@@ -28,11 +28,18 @@ class DataSet
     public $pdoStatement = null;
 
     /**
+     * Statement的列数
+     *
+     * @var int
+     */
+    public $columnCount = null;
+
+    /**
      * 缓存的列元的信息
      *
      * @var array
      */
-    protected $column_metas = null;
+    public $columnMetas = null;
 
 
     /**
@@ -43,6 +50,15 @@ class DataSet
     public function __construct(\PDOStatement $pdoStatement = null)
     {
         $this->pdoStatement = $pdoStatement;
+
+        // 列数
+        $this->columnCount = $pdoStatement->columnCount();
+
+        // 列元信息
+        $this->columnMetas = [];
+        for ($i = 0; $i < $this->columnCount; $i++) {
+            $this->columnMetas[$i] = $pdoStatement->getColumnMeta($i);
+        }
     }
 
 
@@ -181,34 +197,38 @@ class DataSet
      *
      * 可以指定列名或者列序号，其中第一列的序号是0。
      *
-     * @param int|string $column
+     * @param int|string $column  列序号或列名
+     *
      * @return array|false 成功返回数组，失败返回false。
      */
     public function getColumn($column)
     {
-        $column_count = $this->pdoStatement->columnCount();
-
-        /* 如果是列名 */
-        if (is_string($column)) {
-            $pos = $this->getColumnPosByName($column);
-            if ($pos === false) {
-                return false;
-            } else {
-                return $this->pdoStatement->fetchAll(PDO::FETCH_COLUMN, $pos);
-            }
+        // 列号
+        $colnum = $this->getColumnNumber($column);
+        if ($colnum === false) {
+            return false;
         }
 
-        /* 如果是列序号 */
-        if (is_int($column)) {
-            if ($column_count > $column) {
-                return $this->pdoStatement->fetchAll(PDO::FETCH_COLUMN, $column);
-            } else {
-                return false;
-            }
+        // 返回指定列的所有行
+        return $this->pdoStatement->fetchAll(PDO::FETCH_COLUMN, $colnum);
+    }
+
+
+    /**
+     * 获取DataSet下一行的指定列的值
+     *
+     * @param int|string $column  列序号或列名
+     */
+    public function getValue($column = 0)
+    {
+        // 列号
+        $colnum = $this->getColumnNumber($column);
+        if ($colnum === false) {
+            return false;
         }
 
-        /* 失败 */
-        return false;
+        // 返回指定列的值
+        return $this->pdoStatement->fetchColumn($colnum);
     }
 
 
@@ -221,39 +241,34 @@ class DataSet
      *
      * @return int|false 找到返回列序号，没有找到返回false。
      */
-    public function getColumnPosByName($column_name)
+    public function getColumnNumber($column)
     {
-        // 如果还没有列元信息，则先获取
-        if ($this->column_metas === null) {
-            $this->cacheColumnMetas();
-        }
-
-        // 返回第一个找到的列号
-        $column_count = count($this->column_metas);
-        for ($i = 0; $i < $column_count; $i++) {
-            $column_meta = $this->column_metas[$i];
-            if ($column_name == $column_meta['name']) {
-                return $i;
+        // 如果给出的是字符串
+        if (is_string($column)) {
+            // 匹配第一个找到的列号
+            for ($i = 0; $i < $this->columnCount; $i++) {
+                $column_meta = $this->columnMetas[$i];
+                if ($column === $column_meta['name']) {
+                    return $i;
+                }
             }
+
+            // 没有找到，返回 false
+            return false;
         }
 
-        // 没有找到的话，返回false
+        // 如果给出的是列号
+        if (is_int($column)) {
+            // 合法性检查
+            if (($column < 0) || ($column >= $this->columnCount)) {
+                return false;
+            }
+
+            // 返回
+            return $column;
+        }
+
+        // 非法
         return false;
-    }
-
-
-    /**
-     * 缓存列元数组
-     */
-    protected function cacheColumnMetas()
-    {
-        $this->column_metas = [];
-
-        $column_count = $this->pdoStatement->columnCount();
-
-        for ($i = 0; $i < $column_count; $i++) {
-            $column_meta = $this->pdoStatement->getColumnMeta($i);
-            $this->column_metas[$i] = $column_meta;
-        }
     }
 }
