@@ -2,8 +2,8 @@ DROP TABLE IF EXISTS `zp_test`;
 CREATE TABLE IF NOT EXISTS `zp_test` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code` varchar(20) NOT NULL,
-  `name` varchar(200) NOT NULL,
-  `price` float NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `price` float DEFAULT NULL,
   `modified_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)

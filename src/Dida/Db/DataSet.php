@@ -227,8 +227,14 @@ class DataSet
             return false;
         }
 
-        // 返回指定列的值
-        return $this->pdoStatement->fetchColumn($colnum);
+        // fetchColumn
+        $v = $this->pdoStatement->fetchColumn($colnum);
+        if ($v === false) {
+            return false;
+        }
+
+        // 返回类型化的值
+        return $this->getTypedValue($v, $this->columnMetas[$colnum]['native_type']);
     }
 
 
@@ -270,5 +276,36 @@ class DataSet
 
         // 非法
         return false;
+    }
+
+
+    /**
+     * 根据 $native_type的不同，返回不同类型的值。
+     *
+     * @param mixed $value
+     * @param string $native_type
+     * @return mixed
+     */
+    protected function getTypedValue($value, $native_type)
+    {
+        // 如果是 null，直接返回 null
+        if (is_null($value)) {
+            return null;
+        }
+
+        // 返回不同类型的值
+        switch ($native_type) {
+            case 'INT':
+            case 'INTEGER':
+            case 'LONG':
+            case 'LONGLONG':
+                return intval($value);
+            case 'FLOAT':
+            case 'DOUBLE':
+            case 'DECIMAL':
+                return floatval($value);
+            default:
+                return $value;
+        }
     }
 }

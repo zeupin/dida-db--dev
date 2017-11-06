@@ -200,7 +200,7 @@ EOT;
     /**
      * 测试 count()
      */
-    public function test_count()
+    public function test_count_stmt()
     {
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
@@ -381,5 +381,23 @@ EOT;
         $result = $t->insertOrUpdateMany($records, 'id');
         print_r($result);
         $this->assertEquals([3 => null], $result['succ']);
+    }
+
+
+    public function test_count()
+    {
+        $this->resetMock(__DIR__ . '/zp_test.sql');
+        
+        $t = $this->db->table('test');
+
+        $t->insertOne(
+            ['id' => 401, 'code' => '401', 'name' => '401', 'price' => null,]
+            );
+
+        $result = $t->select()->getRows();
+        var_dump($result);
+
+        $result = $t->count()->getValue();
+        var_dump($result);
     }
 }

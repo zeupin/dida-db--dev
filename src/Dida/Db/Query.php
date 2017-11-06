@@ -1419,6 +1419,11 @@ class Query
         // 如果是 DataSet 支持的方法
         if (method_exists('\Dida\Db\DataSet', $name)) {
             switch ($name) {
+                case 'fetch':
+                case 'fetchAll':
+                case 'fetchColumn':
+                case 'errorCode':
+                case 'errorInfo':
                 case 'getRow':
                 case 'getRows':
                 case 'getColumn':
