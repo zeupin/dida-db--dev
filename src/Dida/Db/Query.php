@@ -1073,10 +1073,12 @@ class Query
 
 
     /**
-     * 插入一条记录，返回影响的行数或insertid。
+     * 插入一条记录。
      *
      * @param array $record
      * @param int $insertReturn  返回类型
+     *     INSERT_RETURN_COUNT  返回受影响的行数
+     *     INSERT_RETURN_ID     返回插入的id
      */
     public function insertOne(array $record, $insertReturn = self::INSERT_RETURN_COUNT)
     {
@@ -1128,7 +1130,7 @@ class Query
      *    self::INSERT_MANY_RETURN_SUCC_LIST     执行成功的列表
      *    self::INSERT_MANY_RETURN_FAIL_COUNT    执行失败的条数
      *    self::INSERT_MANY_RETURN_FAIL_LIST     执行失败的列表
-     *    self::INSERT_MANY_RETURN_FAIL_REPORT   执行失败的具体报告
+     *    self::INSERT_MANY_RETURN_FAIL_REPORT   执行失败的报告
      */
     public function insertMany(array $records, $returnType = self::INSERT_RETURN_COUNT)
     {
