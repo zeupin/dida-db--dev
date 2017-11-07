@@ -41,9 +41,8 @@ class Db
      */
     protected $cfg = [
         /* 必填参数 */
-        'db.name'          => null, // 数据库的名字
-        'db.driver'        => null, // 数据库驱动类型,如“Mysql”
-        'db.schemainfo_dir' => null, // SchemaInfo的缓存目录
+        'db.name'   => null, // 数据库的名字
+        'db.driver' => null, // 数据库驱动类型,如“Mysql”
 
         /* pdo 相关参数 */
         'db.dsn'      => null,
@@ -177,7 +176,7 @@ class Db
     /**
      * 创建一个新的Query实例对象。
      *
-     * 针对不同的数据库，建议重写对应的逻辑，覆盖掉本方法。
+     * 针对不同的数据库，应该重写对应的逻辑，覆盖掉本方法。
      *
      * @return Query
      */
