@@ -47,18 +47,44 @@ abstract class SchemaInfo
     protected $prefix = '';
 
     /**
-     * 保存的数元信息
+     * 保存的表元信息（一般不会用到）。
      *
      * @var array
      */
-    protected $tableinfo = [];
+    protected $tables = null;
 
     /**
-     * 保存的列元信息
+     * 保存的列元信息。
      *
      * @var array
+     * [
+     *     表名 => [列名 => 列元数组, 列名 => 列元数组, ...],
+     *     表名 => [列名 => 列元数组, 列名 => 列元数组, ...],
+     * ]
+     *
+     * 其中，列元数组为：
+     * [
+     *     'basetype' => 基本数据类型,见 COLUMN_TYPE_*** 常量
+     *     'len'  => 长度,
+     *     'precision' => 精度,
+     * ]
      */
-    protected $columninfo = [];
+    protected $columns = null;
+
+    /**
+     * 保存的用于快捷查询信息。
+     *
+     * @var array
+     * [
+     *     表名 => [
+     *                 'pri'        =>
+     *                 'pris'       =>
+     *                 'unis'       =>
+     *                 'columnlist' =>
+     *             ]
+     * ]
+     */
+    protected $info = null;
 
 
     /**
@@ -92,7 +118,7 @@ abstract class SchemaInfo
      *
      * @return array
      */
-    abstract public function listTableNames($prefix = null);
+    abstract public function getTableList($prefix = null);
 
 
     /**
@@ -108,35 +134,7 @@ abstract class SchemaInfo
      *
      * @return array
      */
-    abstract public function getAllColumnInfo($table);
-
-
-    /**
-     * 获取<schema.table>的唯一主键的键名。
-     *
-     * 如果没有唯一主键，或者不是唯一主键，则返回 null。
-     *
-     * @return string|null
-     */
-    abstract public function getPrimaryKey($table);
-
-
-    /**
-     * 获取<schema.table>的复合主键的列名列表。
-     *
-     * 如果没有复合主键，或者不是复合主键，则返回 null。
-     *
-     * @return array|null
-     */
-    abstract public function getPrimaryKeys($table);
-
-
-    /**
-     * 获取<schema.table>的所有UNIQUE约束的列名数组
-     *
-     * @return array
-     */
-    abstract public function getUniqueColumns($table);
+    abstract public function getColumnInfoList($table);
 
 
     /**
@@ -151,14 +149,32 @@ abstract class SchemaInfo
      * 获取指定列的相关信息
      *
      * @return array
-     * [
-     *     'name' => 列名,
-     *     'basetype' => 基本数据类型,见 COLUMN_TYPE_*** 常量
-     *     'len'  => 长度,
-     *     'precision' => 精度,
-     * ]
      */
     abstract public function getColumnInfo($column, $table);
+
+
+    /**
+     * 获取<schema.table>的唯一主键的键名。
+     *
+     * @return string|null  如果没有唯一主键，或者不是唯一主键，则返回 null。
+     */
+    abstract public function getPrimaryKey($table);
+
+
+    /**
+     * 获取<schema.table>的复合主键的列名列表。
+     *
+     * @return array|null  如果没有复合主键，或者不是复合主键，则返回 null。
+     */
+    abstract public function getPrimaryKeys($table);
+
+
+    /**
+     * 获取<schema.table>的所有UNIQUE约束的列名数组
+     *
+     * @return array
+     */
+    abstract public function getUniqueColumns($table);
 
 
     /**
