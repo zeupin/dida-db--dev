@@ -47,41 +47,24 @@ abstract class SchemaInfo
     protected $prefix = '';
 
     /**
-     * 保存的表元信息（一般不会用到）。
-     *
-     * @var array
-     */
-    protected $tables = null;
-
-    /**
-     * 保存的列元信息。
-     *
-     * @var array
-     * [
-     *     表名 => [列名 => 列元数组, 列名 => 列元数组, ...],
-     *     表名 => [列名 => 列元数组, 列名 => 列元数组, ...],
-     * ]
-     *
-     * 其中，列元数组为：
-     * [
-     *     'basetype' => 基本数据类型,见 COLUMN_TYPE_*** 常量
-     *     'len'  => 长度,
-     *     'precision' => 精度,
-     * ]
-     */
-    protected $columns = null;
-
-    /**
      * 保存的用于快捷查询信息。
      *
      * @var array
      * [
      *     表名 => [
-     *                 'pri'        =>
-     *                 'pris'       =>
-     *                 'unis'       =>
-     *                 'columnlist' =>
+     *                 'pri'        => 唯一主键的键名,
+     *                 'pris'       => [复合主键的列名数组],
+     *                 'unis'       => [unique约束的列名数组],
+     *                 'columnlist' => [列名数组]
+     *                 'columns'    => [列元数组],
      *             ]
+     * ]
+     * 其中，列元数组为：
+     * [
+     *     'basetype' => 基本数据类型,见 COLUMN_TYPE_*** 常量
+     *     'len'  => 长度,
+     *     'precision' => 精度,
+     *     'nullable' => 可否为空,
      * ]
      */
     protected $info = null;
@@ -118,7 +101,7 @@ abstract class SchemaInfo
      *
      * @return array
      */
-    abstract public function getTableList($prefix = null);
+    abstract public function getTableList();
 
 
     /**
