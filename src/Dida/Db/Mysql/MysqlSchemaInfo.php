@@ -8,123 +8,14 @@ namespace Dida\Db\Mysql;
 
 use \PDO;
 use \Exception;
+use \Dida\Db\SchemaInfo;
 
 /**
  * MysqlSchemaInfo
  */
-class MysqlSchemaInfo extends \Dida\Db\SchemaInfo
+class MysqlSchemaInfo extends \Dida\Db\SchemaInfo\SchemaInfoFileCache
 {
-    /**
-     * 列出指定数据库中的所有数据表的表名.
-     */
-    public function listTableNames($prefix = null, $schema = null)
-    {
-        if ($prefix === null) {
-            $prefix = $this->prefix;
-        }
-        if ($schema === null) {
-            $schema = $this->schema;
-        }
-
-        $sql = <<<'EOT'
-SELECT
-    `TABLE_NAME`
-FROM
-    `information_schema`.`TABLES`
-WHERE
-    (`TABLE_SCHEMA` LIKE :schema) AND (`TABLE_NAME` LIKE :table)
-ORDER BY
-    `TABLE_SCHEMA`, `TABLE_NAME`
-EOT;
-        $stmt = $this->db->getPDO()->prepare($sql);
-        $stmt->execute([
-            ':schema' => $schema,
-            ':table'  => $prefix . '%',
-        ]);
-        $result = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
-        return $result;
-    }
-
-
-    /**
-     * 获取<schema.table>的表信息
-     */
-    public function getTableInfo($table, $schema = null)
-    {
-        if ($schema === null) {
-            $schema = $this->schema;
-        }
-
-        $sql = <<<'EOT'
-SELECT
-    `TABLE_SCHEMA`,
-    `TABLE_NAME`,
-    `TABLE_TYPE`,
-    `TABLE_CATALOG`,
-    `ENGINE`,
-    `TABLE_COLLATION`,
-    `TABLE_COMMENT`
-FROM
-    information_schema.TABLES
-WHERE
-    (`TABLE_SCHEMA` LIKE :schema) AND (`TABLE_NAME` LIKE :table)
-EOT;
-        $stmt = $this->db->getPDO()->prepare($sql);
-        $stmt->execute([
-            ':schema' => $schema,
-            ':table'  => $table,
-        ]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result;
-    }
-
-
-    /**
-     * 获取<schema.table>所有列的信息
-     */
-    public function getAllColumnInfo($table, $schema = null)
-    {
-        if ($schema === null) {
-            $schema = $this->schema;
-        }
-
-        $sql = <<<'EOT'
-SELECT
-    `COLUMN_NAME`,
-    `ORDINAL_POSITION`,
-    `COLUMN_DEFAULT`,
-    `IS_NULLABLE`,
-    `DATA_TYPE`,
-    `CHARACTER_MAXIMUM_LENGTH`,
-    `NUMERIC_PRECISION`,
-    `NUMERIC_SCALE`,
-    `DATETIME_PRECISION`,
-    `CHARACTER_SET_NAME`,
-    `COLLATION_NAME`,
-    `COLUMN_TYPE`,
-    `COLUMN_KEY`,
-    `EXTRA`,
-    `PRIVILEGES`,
-    `COLUMN_COMMENT`
-FROM
-    `information_schema`.`COLUMNS`
-WHERE
-    (`TABLE_SCHEMA` LIKE :schema) AND (`TABLE_NAME` LIKE :table)
-ORDER BY
-    `ORDINAL_POSITION`
-EOT;
-        $stmt = $this->db->getPDO()->prepare($sql);
-        $stmt->execute([
-            ':schema' => $schema,
-            ':table'  => $table,
-        ]);
-        $result = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $row['BASE_TYPE'] = $this->getBaseType($row['DATA_TYPE']);
-            $result[$row['COLUMN_NAME']] = $row;
-        }
-        return $result;
-    }
+    use MysqlSchemaInfoTrait;
 
 
     /**
@@ -139,7 +30,7 @@ EOT;
             case 'text':
             case 'mediumtext':
             case 'longtext':
-                return 'string';
+                return SchemaInfo::COLUMN_TYPE_STRING;
 
             /* numeric type */
             case 'int':
@@ -147,98 +38,166 @@ EOT;
             case 'smallint':
             case 'mediumint':
             case 'bigint':
+            case 'timestamp':
+                return SchemaInfo::COLUMN_TYPE_INT;
+
             case 'float':
             case 'double':
             case 'decimal':
-            case 'timestamp':
-                return 'numeric';
+                return SchemaInfo::COLUMN_TYPE_FLOAT;
 
             /* time type */
             case 'datetime':
             case 'date':
-                return 'time';
+                return SchemaInfo::COLUMN_TYPE_TIME;
 
             /* enum */
             case 'enum':
-                return 'enum';
+                return SchemaInfo::COLUMN_TYPE_ENUM;
 
             /* set */
             case 'set':
-                return 'set';
+                return SchemaInfo::COLUMN_TYPE_SET;
 
             /* binary */
             case 'varbinary':
-                return 'stream';
+                return SchemaInfo::COLUMN_TYPE_STREAM;
 
             /* unknown type */
             default:
-                return '';
+                return SchemaInfo::COLUMN_TYPE_UNKNOWN;
         }
     }
 
 
     /**
-     * 获取<schema.table>的主键的列名列表
+     * 生成指定表的缓存文件
      *
-     * @return string|null
+     * @param string $table
      */
-    public function getPrimaryKeys($table, $schema = null)
+    public function cacheTable($table)
     {
-        if ($schema === null) {
-            $schema = $this->schema;
-        }
+        // 表元数据
+        $tables = $this->queryTableInfo($table);
+        $this->processTables($tables);
 
-        $sql = <<<'EOT'
-SELECT
-    `COLUMN_NAME`
-FROM
-    `information_schema`.`COLUMNS`
-WHERE
-    (`TABLE_SCHEMA` LIKE :schema) AND (`TABLE_NAME` LIKE :table) AND (`COLUMN_KEY` LIKE 'PRI')
-ORDER BY
-    `ORDINAL_POSITION`
-EOT;
-        $stmt = $this->db->getPDO()->prepare($sql);
-        $stmt->execute([
-            ':schema' => $schema,
-            ':table'  => $table,
-        ]);
-        $rows = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
-        return $rows;
+        // 列元数据
+        $columns = $this->queryColumnInfo($table);
+        $this->processColumns($columns);
     }
 
 
     /**
-     * 获取<schema.table>的所有UNIQUE约束的列名数组
-     *
-     * @return array
+     * 重新生成所有表的缓存文件
      */
-    public function getUniqueColumns($table, $schema = null)
+    public function cacheAllTables()
     {
-        if ($schema === null) {
-            $schema = $this->schema;
+        // 清空缓存目录
+        $this->clearDir($this->cacheDir);
+
+        // 表元数据
+        $tables = $this->queryAllTableInfo();
+        $this->processTables($tables);
+
+        // 列元数据
+        $columns = $this->queryAllColumnInfo();
+        $this->processColumns($columns);
+    }
+
+
+    /**
+     * 保存 “表名.metas.php”
+     *
+     * @param array $tables
+     */
+    protected function processTables(array $tables)
+    {
+        foreach ($tables as $table) {
+            // 保存表元文件
+            $path = $this->cacheDir . DIRECTORY_SEPARATOR . $table['TABLE_NAME'] . '.table.php';
+            $content = "<?php\nreturn " . var_export($table, true) . ";\n";
+            file_put_contents($path, $content);
+        }
+    }
+
+
+    protected function processColumns(array $columns)
+    {
+        $info = [];
+
+        foreach ($columns as $column) {
+            $brief = $column;
+            unset($brief['TABLE_NAME'], $brief['COLUMN_NAME']);
+            $info[$column['TABLE_NAME']][$column['COLUMN_NAME']] = $brief;
         }
 
-        $sql = <<<'EOT'
-SELECT
-    `COLUMN_NAME`
-FROM
-    `information_schema`.`COLUMNS`
-WHERE
-    (`TABLE_SCHEMA` LIKE :schema) AND (`TABLE_NAME` LIKE :table) AND (`COLUMN_KEY` LIKE 'UNI')
-ORDER BY
-    `ORDINAL_POSITION`
-EOT;
-        $stmt = $this->db->getPDO()->prepare($sql);
-        $stmt->execute([
-            ':schema' => $schema,
-            ':table'  => $table,
-        ]);
-        $result = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
-        if ($result) {
-            return $result;
-        } else {
-            return [];
+        // 保存原生的列元信息
+        foreach ($info as $table => $data) {
+            $path = $this->cacheDir . DIRECTORY_SEPARATOR . $table . '.columns.php';
+            $content = "<?php\nreturn " . var_export($data, true) . ";\n";
+            file_put_contents($path, $content);
+        }
+
+        // 保存portable的列元信息
+        foreach ($info as $table => $data) {
+            $path = $this->cacheDir . DIRECTORY_SEPARATOR . $table . '.php';
+
+            $pri = null;
+            $pris = [];  // primary keys
+            $unis = [];  // unique keys
+            $columnlist = [];  // 列名列表
+            $columns = [];  // 列元列表
+
+            foreach ($data as $col => $metas) {
+                $columnlist[] = $col;
+
+                if ($metas['COLUMN_KEY'] === 'PRI') {
+                    $pris[] = $col;
+                } elseif ($metas['COLUMN_KEY'] === 'UNI') {
+                    $unis[] = $col;
+                }
+
+                $column = [
+                    'datatype'  => $this->getBaseType($metas['DATA_TYPE']),
+                    'nullable'  => ($metas['IS_NULLABLE'] === 'YES'),
+                    'precision' => $metas['NUMERIC_PRECISION'],
+                    'scale'     => $metas['NUMERIC_SCALE'],
+                    'len'       => $metas['CHARACTER_MAXIMUM_LENGTH'],
+                    'charset'   => $metas['CHARACTER_SET_NAME'],
+                ];
+                $columns[$col] = $column;
+            }
+
+            // 单一主键还是复合主键
+            switch (count($pris)) {
+                case 0:
+                    $pri = null;
+                    $pris = null;
+                    break;
+                case 1:
+                    $pri = $pris[0];
+                    $pris = null;
+                    break;
+                default:
+                    $pri = null;
+            }
+
+            // 唯一键列表
+            if (empty($unis)) {
+                $unis = null;
+            }
+
+            // portable的列元数据
+            $output = [
+                'pri'        => $pri,
+                'pris'       => $pris,
+                'unis'       => $unis,
+                'columnlist' => $columnlist,
+                'columns'    => $columns,
+            ];
+
+            $content = "<?php\nreturn " . var_export($output, true) . ";\n";
+            file_put_contents($path, $content);
         }
     }
 }

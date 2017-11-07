@@ -4,7 +4,7 @@
 
 ## Schema接口
 
-### `listTableNames($schema, $prefix = '')`
+### `getTableList($schema, $prefix = '')`
 > 列出`$schema`数据库里面含有`$prefix`的所有数据表。
 > 
 > 结果返回一个一维数组，里面包含所有查询到的表名。

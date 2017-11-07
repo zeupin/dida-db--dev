@@ -18,7 +18,7 @@ class SchemaInfoTest extends TestCase
     public $db = null;
 
     /**
-     * @var \Dida\Db\SchemaInfo
+     * @var \Dida\Db\Mysql\MysqlSchemaInfo
      */
     public $schemainfo = null;
 
@@ -36,9 +36,14 @@ class SchemaInfoTest extends TestCase
         $this->schemainfo = $this->db->getSchemaInfo();
     }
 
-
-    public function test_saveAllTableInfo()
+    public function test_cacheTable()
     {
-        $this->schemainfo->saveAllTableInfo();
+        $this->schemainfo->cacheTable('zp_test');
+    }
+
+
+    public function test_cacheAllTables()
+    {
+        $this->schemainfo->cacheAllTables();
     }
 }

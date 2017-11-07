@@ -80,9 +80,9 @@ class Db
      */
     protected function setConfig(array &$cfg)
     {
-        foreach ($this->cfg as $key => $value) {
-            if (array_key_exists($key, $cfg)) {
-                $this->cfg[$key] = $cfg[$key];
+        foreach ($cfg as $key => $value) {
+            if (substr($key, 0, 3) === 'db.') {
+                $this->cfg[$key] = $value;
             }
         }
 
@@ -102,7 +102,7 @@ class Db
 
 
     /**
-     * 设置当前的 Connection 实例。
+     * 配置 Connection 实例。
      *
      * @param \Dida\Db\Connection $connection
      */
@@ -126,7 +126,7 @@ class Db
 
 
     /**
-     * 设置当前的 Builder 实例。
+     * 配置 Builder 实例。
      *
      * @param \Dida\Db\Builder $builder
      */
@@ -150,11 +150,11 @@ class Db
 
 
     /**
-     * 设置当前的 SchemaInfo 实例。
+     * 配置 SchemaInfo 实例。
      *
      * @param \Dida\Db\SchemaInfo $schemainfo
      */
-    public function setSchemeMap($schemainfo)
+    public function setSchemaInfo($schemainfo)
     {
         $this->schemainfo = $schemainfo;
 
