@@ -23,18 +23,11 @@ class Builder
     protected $db = null;
 
     /**
-     * @var \Dida\Db\SchemaInfo
-     */
-    protected $schemainfo = null;
-
-
-
-    /**
      * 和本次build相关的数据表信息，主要是为了表的别名的处理。
      * 只在一个build期间存在，build完了就销毁。
      * [
-     *    表名     => 指向 schemainfo->info[表名],
-     *    表的别名 => 指向 schemainfo->info[表名],
+     *    表名     => 指向 db->schemainfo->info[表名],
+     *    表的别名 => 指向 db->schemainfo->info[表名],
      * ]
      */
     protected $localSchemaInfo = [];
@@ -134,8 +127,6 @@ class Builder
     public function __construct(&$db)
     {
         $this->db = $db;
-
-        $this->schemainfo = &$this->db->getSchemaInfo();
     }
 
 
@@ -1329,7 +1320,7 @@ class Builder
         $realname = $this->util_table_with_prefix($name, $prefix);
 
         // 指向到 schemainfo 的对应节点处
-        $tableinfo = $this->schemainfo->getTable($realname);
+        $tableinfo = $this->db->getSchemaInfo()->getTable($realname);
         if (!$tableinfo) {
             throw new Exception("SchemaInfo中没有找到数据表{$realname}的相关信息");
         }

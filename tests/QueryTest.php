@@ -28,8 +28,9 @@ class QueryTest extends TestCase
     public function __construct()
     {
         $cfg = include(__DIR__ . "/db.config.php");
+
         $this->db = new Dida\Db\Mysql\MysqlDb($cfg);
-        $schemainfo = $this->db->getSchemaInfo();
+        $this->conn = $this->db->getConnection();
     }
 
 
