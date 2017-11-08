@@ -115,7 +115,7 @@ class DateSetTest extends TestCase
     {
         // 列名不存在，返回false
         $this->initData();
-        $result = $this->dataset->getColumnPosByName('not_exists');
+        $result = $this->dataset->getColumnNumber('not_exists');
         $this->assertFalse($result);
         echo Debug::varDump(__METHOD__, $result);
     }
@@ -161,6 +161,66 @@ class DateSetTest extends TestCase
         // 看看结果
         $result = $this->dataset->fetchAll();
         $this->assertNotFalse($result);
+        echo Debug::varDump(__METHOD__, $result);
+    }
+
+
+    public function test_getGroupRows()
+    {
+        $this->initData();
+        $result = $this->dataset->getGroupRows('id');
+
+        // 看看结果
+        echo Debug::varDump(__METHOD__, $result);
+    }
+
+
+    public function test_getGroupRows2()
+    {
+        $sqlColumns = <<<'EOT'
+SELECT
+    `TABLE_NAME`,
+    `COLUMN_NAME`,
+    `ORDINAL_POSITION`,
+    `COLUMN_DEFAULT`,
+    `IS_NULLABLE`,
+    `DATA_TYPE`,
+    `CHARACTER_MAXIMUM_LENGTH`,
+    `NUMERIC_PRECISION`,
+    `NUMERIC_SCALE`,
+    `DATETIME_PRECISION`,
+    `CHARACTER_SET_NAME`,
+    `COLLATION_NAME`,
+    `COLUMN_TYPE`,
+    `COLUMN_KEY`,
+    `EXTRA`,
+    `COLUMN_COMMENT`
+FROM
+    `information_schema`.`COLUMNS`
+WHERE
+    (`TABLE_SCHEMA` LIKE :schema) AND (`TABLE_NAME` LIKE :table)
+ORDER BY
+    `TABLE_NAME`, `ORDINAL_POSITION`
+EOT;
+
+        $stmt = $this->conn->getPDO()->prepare($sqlColumns);
+        $stmt->execute([
+            ':schema' => 'zeupin',
+            ':table'  => 'zp_test',
+        ]);
+        $dataset = new DataSet($stmt);
+
+        $result = $dataset->getGroupRows('TABLE_NAME', 'COLUMN_NAME');
+        echo Debug::varDump(__METHOD__, $result);
+
+        $stmt = $this->conn->getPDO()->prepare($sqlColumns);
+        $stmt->execute([
+            ':schema' => 'zeupin',
+            ':table'  => 'zp_test',
+        ]);
+        $dataset = new DataSet($stmt);
+
+        $result = $dataset->getGroupRowsByKeys('TABLE_NAME', 'COLUMN_NAME');
         echo Debug::varDump(__METHOD__, $result);
     }
 }

@@ -182,94 +182,92 @@ class DataSet
 
 
     /**
-     * 获取所有行。对 fetchAll() 的简单调用。
+     * 获取所有行。
      *
      * @return array(array)|false
      */
-    public function getRows()
+    public function getRows($key = null)
     {
-        return $this->pdoStatement->fetchAll();
+        $array = $this->pdoStatement->fetchAll();
+
+        // 简单的返回所有行
+        if (is_null($key)) {
+            return $array;
+        }
+
+        // 加上索引字段
+        $keys = array_column($array, $key);
+        return array_combine($keys, $array);
     }
 
 
     /**
-     * 获取指定列的所有行。
+     * 获取分组化的Rows
      *
-     * 可以指定列名或者列序号，其中第一列的序号是0。
-     *
-     * @param int|string $column  列序号或列名
-     *
-     * @return array|false 成功返回数组，失败返回false。
+     * @param mixed $col    需要分组的列名，可用多个字段进行分组
      */
-    public function getColumn($column)
+    public function getGroupRows($col)
     {
-        // 列号
-        $colnum = $this->getColumnNumber($column);
-        if ($colnum === false) {
-            return false;
+        $array = $this->pdoStatement->fetchAll();
+        if (!$array) {
+            return $array;
         }
 
-        // 返回指定列的所有行
-        return $this->pdoStatement->fetchAll(PDO::FETCH_COLUMN, $colnum);
+        $return = [];
+        $args = func_get_args();
+
+        while ($row = array_shift($array)) {
+            $cur = &$return;
+
+            foreach ($args as $arg) {
+                $key = $row[$arg];
+                if (!array_key_exists($key, $cur)) {
+                    $cur[$key] = [];
+                }
+                $cur = &$cur[$key];
+                unset($row[$arg]);
+            }
+
+            $cur[] = $row;
+        }
+
+        return $return;
     }
 
 
     /**
-     * 获取指定列的唯一值。
+     * 获取键值化的 Rows。
+     * 需要自行保证给出的 $key 的组合可以唯一确定一条记录，类似复合主键
      *
-     * 可以指定列名或者列序号，其中第一列的序号是0。
+     * @param mixed $key   需要分组的key列名，可用多个key字段组成一个复合主键来进行分组。
      *
-     * @param int|string $column  列序号或列名
-     *
-     * @return array|false 成功返回数组，失败返回false。
      */
-    public function getColumnUnique($column)
+    public function getGroupRowsByKeys($key)
     {
-        // 列号
-        $colnum = $this->getColumnNumber($column);
-        if ($colnum === false) {
-            return false;
+        $array = $this->pdoStatement->fetchAll();
+        if (!$array) {
+            return $array;
         }
 
-        // 返回指定列的所有行
-        return $this->pdoStatement->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, $colnum);
-    }
+        $return = [];
+        $args = func_get_args();
 
+        while ($row = array_shift($array)) {
+            $cur = &$return;
 
-    /**
-     * 获取DataSet下一行的指定列的值。
-     *
-     * 注意：似乎 fetchColumn() 返回的都是字符串类型的值，而不是预期的在数据库中定义的 int/float 等类型。
-     * 估计他们的初衷是考虑到数据库的变量类型和PHP的变量类型转换有差异，所以把这个转换留给开发者自行处理。
-     * 因此，如果需要返回特定类型的值，需要指定 $returnType 参数。
-     *
-     * @param int|string $column  列序号或列名
-     * @param string $returnType   返回的类型，可为 int/float
-     */
-    public function getValue($column = 0, $returnType = null)
-    {
-        // 列号
-        $colnum = $this->getColumnNumber($column);
-        if ($colnum === false) {
-            return false;
+            foreach ($args as $arg) {
+                $key = $row[$arg];
+                if (!array_key_exists($key, $cur)) {
+                    $cur[$key] = [];
+                }
+                $cur = &$cur[$key];
+                unset($row[$arg]);
+            }
+
+            $cur = $row;  // 就这个地方和 getGroupRows() 不同
         }
 
-        // fetchColumn
-        $v = $this->pdoStatement->fetchColumn($colnum);
-
-        // 如果为空，返回null
-        if (is_null($v)) {
-            return null;
-        }
-
-        switch ($returnType) {
-            case 'int':
-                return (is_numeric($v)) ? intval($v) : false;
-            case 'float':
-                return (is_numeric($v)) ? floatval($v) : false;
-            default:
-                return $v;
-        }
+        return $return;
     }
 
 
@@ -278,7 +276,7 @@ class DataSet
      *
      * 注意：SQL同一个列名完全可以对应不同的列号，如“SELECT id,id FROM user”。
      *
-     * @param string $column_name
+     * @param int|string $column  指定列名或者列序号，其中第一列的序号是0。
      *
      * @return int|false 找到返回列序号，没有找到返回false。
      */
@@ -311,5 +309,95 @@ class DataSet
 
         // 非法
         return false;
+    }
+
+
+    /**
+     * 获取指定列的所有行。
+     *
+     * @param int|string $column  指定列名或者列序号，其中第一列的序号是0。
+     *
+     * @return array|false 成功返回数组，失败返回false。
+     */
+    public function getColumn($column, $key = null)
+    {
+        // 列号
+        $colnum = $this->getColumnNumber($column);
+        if ($colnum === false) {
+            return false;
+        }
+
+        if (!is_null($key)) {
+            $key = $this->getColumnNumber($key);
+            if ($key === false) {
+                return false;
+            }
+        }
+
+        if (is_null($key)) {
+            // 返回指定列的所有行
+            return $this->pdoStatement->fetchAll(PDO::FETCH_COLUMN, $colnum);
+        } else {
+            // 返回指定列的所有行
+            $array = $this->pdoStatement->fetchAll(PDO::FETCH_NUM);
+            return array_column($input, $colnum, $key);
+        }
+    }
+
+
+    /**
+     * 获取指定列的唯一值。
+     *
+     * @param int|string $column  指定列名或者列序号，其中第一列的序号是0。
+     *
+     * @return array|false 成功返回数组，失败返回false。
+     */
+    public function getColumnUniques($column)
+    {
+        // 列号
+        $colnum = $this->getColumnNumber($column);
+        if ($colnum === false) {
+            return false;
+        }
+
+        // 返回指定列的所有行
+        return $this->pdoStatement->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, $colnum);
+    }
+
+
+    /**
+     * 获取DataSet下一行的指定列的值。
+     *
+     * 注意：似乎 fetchColumn() 返回的都是字符串类型的值，而不是预期的在数据库中定义的 int/float 等类型。
+     * 估计他们的初衷是考虑到数据库的变量类型和PHP的变量类型转换有差异，所以把这个转换留给开发者自行处理。
+     * 因此，如果需要返回特定类型的值，需要指定 $returnType 参数。
+     *
+     * @param int|string $column   指定列名或者列序号，其中第一列的序号是0。
+     * @param string $returnType   返回的类型，可为 int/float
+     */
+    public function getValue($column = 0, $returnType = null)
+    {
+        // 列号
+        $colnum = $this->getColumnNumber($column);
+        if ($colnum === false) {
+            return false;
+        }
+
+        // fetchColumn
+        $v = $this->pdoStatement->fetchColumn($colnum);
+
+        // 如果为空，返回null
+        if (is_null($v)) {
+            return null;
+        }
+
+        switch ($returnType) {
+            case 'int':
+                return (is_numeric($v)) ? intval($v) : false;
+            case 'float':
+                return (is_numeric($v)) ? floatval($v) : false;
+            default:
+                return $v;
+        }
     }
 }
