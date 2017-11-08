@@ -1419,15 +1419,11 @@ class Query
         // 如果是 DataSet 支持的方法
         if (method_exists('\Dida\Db\DataSet', $name)) {
             switch ($name) {
-                case 'fetch':
-                case 'fetchAll':
-                case 'fetchColumn':
-                case 'errorCode':
-                case 'errorInfo':
-                case 'getRow':
-                case 'getRows':
-                case 'getColumn':
-                case 'getValue':
+                case 'not support':
+                    // 如果不想支持某些方法，在这里加上若干 case 去除。
+                    break;
+                default:
+                    // 默认支持DataSet所有方法。
                     $dataset = $this->select();
                     return call_user_func_array([$dataset, $name], $arguments);
             }
