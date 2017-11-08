@@ -178,6 +178,7 @@ class Query
             throw new Exception('Builder实例未指定');
         }
 
+        // 如果指定了verb，把verb转为大写
         if (is_string($verb)) {
             $verb = trim($verb);
             $verb = strtoupper($verb);

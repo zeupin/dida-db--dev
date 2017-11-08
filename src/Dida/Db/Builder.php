@@ -7,7 +7,6 @@
 namespace Dida\Db;
 
 use \Exception;
-use \Dida\Debug\Debug;
 
 /**
  * SQL表达式构造器。
@@ -174,7 +173,7 @@ class Builder
             case 'TRUNCATE':
                 return $this->build_TRUNCATE();
             default:
-                throw new Exception("Invalid build verb: {$this->tasklist['verb']}");
+                throw new Exceptions\InvalidVerbBuilderException($this->tasklist['verb']);
         }
     }
 

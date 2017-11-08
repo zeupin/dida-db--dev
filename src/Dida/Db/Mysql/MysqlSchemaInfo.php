@@ -6,8 +6,6 @@
 
 namespace Dida\Db\Mysql;
 
-use \PDO;
-use \Exception;
 use \Dida\Db\SchemaInfo;
 
 /**

@@ -6,9 +6,6 @@
 
 namespace Dida\Db;
 
-use \PDO;
-use \Exception;
-
 /**
  * Db
  */

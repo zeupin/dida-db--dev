@@ -1,13 +1,7 @@
 <?php
 
 use \PHPUnit\Framework\TestCase;
-use \PDO;
-use \Exception;
-use \Dida\Debug\Debug;
 use \Dida\Db\Builder;
-use \Dida\Db\Query;
-use \Dida\Db\Connection;
-use \Dida\Db\Db;
 
 /**
  * BuilderTest

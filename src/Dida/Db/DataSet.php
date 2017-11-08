@@ -7,8 +7,6 @@
 namespace Dida\Db;
 
 use \PDO;
-use \PDOStatement;
-use \Exception;
 
 /**
  * DataSet
