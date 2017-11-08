@@ -46,18 +46,8 @@ class Connection
      *
      * @param \Dida\Db\Db $db
      */
-    public function __construct(&$db)
+    public function __construct($cfg)
     {
-        $this->db = $db;
-
-        $this->initConfig();
-    }
-
-
-    protected function initConfig()
-    {
-        $cfg = $this->db->getConfig();
-
         $this->cfg = [
             'db.driver'      => $cfg['db.driver'],
             'db.dsn'         => $cfg['db.dsn'],
