@@ -578,6 +578,13 @@ class Builder
         foreach ($joins as $join) {
             list($jointype, $table, $on, $parameters) = $join;
 
+            // 登记join进来的这个表
+            $table_alias = $this->util_split_name_alias($table);
+            $this->util_register_table($table_alias['name'], $table_alias['alias']);
+
+            // 生成标准形式的 $table
+            $table = $this->util_table_with_alias($table_alias['name'], $table_alias['alias']);
+
             $st[] = "\n{$jointype} {$table}\n    ON $on";
             $pa[] = $parameters;
         }
@@ -1179,7 +1186,7 @@ class Builder
     /**
      * 把一个“name AS alias”形式的字符串解析出来。
      *
-     * 注意：参数必须以“AS”为分隔符才能被识别出来（AS/as/As都行）。
+     * 注意：参数必须以“{空格}AS/as/As{空格}”为分隔符才能被识别出来。
      *
      * @param string $name_as_alias
      *      可能的取值为："name" 或者 "name AS alias"
