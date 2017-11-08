@@ -75,6 +75,18 @@ abstract class SchemaInfoFileCache extends \Dida\Db\SchemaInfo
     }
 
 
+    public function &getTable($table)
+    {
+        // 不存在这个表，返回false
+        if (!$this->tableExists($table)) {
+            return false;
+        }
+
+        // 返回数据
+        return $this->info[$table];
+    }
+
+
     /**
      * 获取<schema.table>的表元信息。
      *
@@ -218,6 +230,7 @@ abstract class SchemaInfoFileCache extends \Dida\Db\SchemaInfo
     protected function loadTableFromCache($table)
     {
         // 文件路径
+        $DS = DIRECTORY_SEPARATOR;
         $path = "{$this->cacheDir}{$DS}{$table}.php";
 
         // 文件是否存在

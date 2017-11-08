@@ -25,14 +25,14 @@ class Db
     protected $connection = null;
 
     /**
-     * @var \Dida\Db\Builder
-     */
-    protected $builder = null;
-
-    /**
      * @var \Dida\Db\SchemaInfo
      */
     protected $schemainfo = null;
+
+    /**
+     * @var \Dida\Db\Builder
+     */
+    protected $builder = null;
 
     /**
      * 缺省设置

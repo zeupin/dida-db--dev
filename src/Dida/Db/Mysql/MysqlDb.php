@@ -24,12 +24,15 @@ class MysqlDb extends \Dida\Db\Db
         $this->cfg['db.driver'] = 'Mysql';
 
         // 配置 Connection
-        $this->connection = new \Dida\Db\Connection($this);
-
-        // 配置 Builder，使用标准的 Builder
-        $this->builder = new \Dida\Db\Builder($this);
+        $conn = new \Dida\Db\Connection($this);
+        $this->connection = &$conn;
 
         // 配置 SchemaInfo，使用 MysqlSchemaInfo
-        $this->schemainfo = new MysqlSchemaInfo($this);
+        $schemainfo = new MysqlSchemaInfo($this);
+        $this->schemainfo = &$schemainfo;
+
+        // 配置 Builder，使用标准的 Builder
+        $builder = new \Dida\Db\Builder($this);
+        $this->builder = &$builder;
     }
 }

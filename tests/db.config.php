@@ -19,5 +19,5 @@ return [
     'db.swap_prefix' => '###_', //
 
     /* SchemaInfo */
-    'db.schemainfo.cachedir' => __DIR__ . '/cache',
+    'db.schemainfo.cachedir' => __DIR__ . DIRECTORY_SEPARATOR . 'cache',
 ];

@@ -23,27 +23,19 @@ class Builder
     protected $db = null;
 
     /**
-     * 常驻的数据库的数据表信息。
-     * 和本对象的生存期一致，会一直保存相关的数据表的表元信息。
-     *
-     * [
-     *     表名 => [
-     *          'pri' => string|null,  // 单一主键的字段名，没有单一主键此处为null
-     *          'multipri' => []|null, // 组合主键的字段列表，没有组合主键，此处为null
-     *          'uni' => [],           // 唯一索引的字段列表
-     *          'columnlist' => [],    // 一维数组，全部列名的列表
-     *          'columns' => [[]],     // 二维数组，列的详细信息
-     *          ],
-     * ]
-     *
-     * @var array
+     * @var \Dida\Db\SchemaInfo
      */
-    protected $globalSchemaInfo = [];
+    protected $schemainfo = null;
+
+
 
     /**
-     * 临时的数据库的数据表信息。
-     * 只在一个build期间存在，build完了就消失了。
-     * 每次build的最初，这个值就被初始化做掉了。
+     * 和本次build相关的数据表信息，主要是为了表的别名的处理。
+     * 只在一个build期间存在，build完了就销毁。
+     * [
+     *    表名     => 指向 schemainfo->info[表名],
+     *    表的别名 => 指向 schemainfo->info[表名],
+     * ]
      */
     protected $localSchemaInfo = [];
 
@@ -142,6 +134,8 @@ class Builder
     public function __construct(&$db)
     {
         $this->db = $db;
+
+        $this->schemainfo = &$this->db->getSchemaInfo();
     }
 
 
@@ -504,7 +498,13 @@ class Builder
     protected function clause_COLUMNLIST()
     {
         if (!$this->has('columnlist')) {
-            $this->ST['columnlist'] = '*';
+            $columnlist = $this->localSchemaInfo[$this->mainTable['name']]['columnlist'];
+            if ($columnlist) {
+                $this->ST['columnlist'] = implode(', ', $columnlist);
+            } else {
+                $this->ST['columnlist'] = '*';
+            }
+
             return;
         }
 
@@ -1318,7 +1318,7 @@ class Builder
 
 
     /**
-     * 登记一个数据表到 $globalSchemaInfo 和 $locaSchemaInfo
+     * 登记一个数据表到 $locaSchemaInfo
      *
      * @param string $name
      * @param string $alias
@@ -1328,28 +1328,19 @@ class Builder
         // 实际的表名
         $realname = $this->util_table_with_prefix($name, $prefix);
 
-        // 如果 $globalSchemaInfo 还没有这个数据表的表元数据，则先从读取表元数据
-        if (!array_key_exists($realname, $this->globalSchemaInfo)) {
-            if (!$tableinfo = $this->db->getSchemaInfo()->readTableInfoFromCache($realname)) {
-                throw new Exception("数据表{$realname}的表元信息不存在");
-            }
-            $this->globalSchemaInfo[$realname] = $tableinfo;
+        // 指向到 schemainfo 的对应节点处
+        $tableinfo = $this->schemainfo->getTable($realname);
+        if (!$tableinfo) {
+            throw new Exception("SchemaInfo中没有找到数据表{$realname}的相关信息");
         }
 
-        // 限制$alias只能为字符串或者null
-        if (!is_string($alias)) {
-            $alias = null;
-        }
+        // 指向到 schemainfo->info[表名]
+        $this->localSchemaInfo[$realname] = $tableinfo;
 
-        // 本地info指向到全局对应的info
-        if (!isset($this->localSchemaInfo[$realname])) {
-            $this->localSchemaInfo[$realname] = &$this->globalSchemaInfo[$realname];
-        }
-
-        // 本地alias的info也指向到全局对应的info
+        // 如果有别名，也指向到 schemainfo->info[表名]
         if ($alias) {
             if (!isset($this->localSchemaInfo[$alias])) {
-                $this->localSchemaInfo[$alias] = &$this->globalSchemaInfo[$realname];
+                $this->localSchemaInfo[$alias] = $tableinfo;
             }
         }
     }

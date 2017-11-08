@@ -19,6 +19,8 @@ class QueryTest extends TestCase
      */
     public $conn = null;
 
+    protected $ALL_COLUMN_NAMES = 'id, code, name, price, modified_at';
+
 
     /**
      * 初始化测试环境
@@ -27,6 +29,7 @@ class QueryTest extends TestCase
     {
         $cfg = include(__DIR__ . "/db.config.php");
         $this->db = new Dida\Db\Mysql\MysqlDb($cfg);
+        $schemainfo = $this->db->getSchemaInfo();
     }
 
 
@@ -39,6 +42,12 @@ class QueryTest extends TestCase
         $this->db->getPDO()->exec($sql);
     }
 
+
+    public function test_all_columns()
+    {
+        $query = $this->db->table('test')->build('select');
+        print_r($query);
+    }
 
     public function test_ConditionTree()
     {
@@ -111,7 +120,7 @@ class QueryTest extends TestCase
         $admin = $this->db->table('test')->build();
         $expected = <<<EOT
 SELECT
-    *
+    $this->ALL_COLUMN_NAMES
 FROM
     zp_test
 EOT;
@@ -160,7 +169,7 @@ EOT;
      */
     public function testCacheAllTableInfo()
     {
-        $this->db->getSchemaInfo()->saveAllTableInfo();
+        $this->db->getSchemaInfo()->cacheAllTables();
     }
 
 
@@ -169,8 +178,8 @@ EOT;
      */
     public function testReadTableInfo()
     {
-        $data = $this->db->getSchemaInfo()->readTableInfoFromCache('zp_test');
-        //var_dump($data);
+        $data = $this->db->getSchemaInfo()->getTable('zp_test');
+        var_dump($data);
     }
 
 
@@ -184,9 +193,9 @@ EOT;
         $t = $this->db->table('test');
         $result = $t->build('SELECT');
         print_r($result);
-        $expected = <<<'EOT'
+        $expected = <<<EOT
 SELECT
-    *
+    $this->ALL_COLUMN_NAMES
 FROM
     zp_test
 EOT;
@@ -387,7 +396,7 @@ EOT;
     public function test_count()
     {
         $this->resetMock(__DIR__ . '/zp_test.sql');
-        
+
         $t = $this->db->table('test');
 
         $t->insertOne(
