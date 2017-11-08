@@ -215,11 +215,38 @@ class DataSet
 
 
     /**
-     * 获取DataSet下一行的指定列的值
+     * 获取指定列的唯一值。
+     *
+     * 可以指定列名或者列序号，其中第一列的序号是0。
      *
      * @param int|string $column  列序号或列名
+     *
+     * @return array|false 成功返回数组，失败返回false。
      */
-    public function getValue($column = 0)
+    public function getColumnUnique($column)
+    {
+        // 列号
+        $colnum = $this->getColumnNumber($column);
+        if ($colnum === false) {
+            return false;
+        }
+
+        // 返回指定列的所有行
+        return $this->pdoStatement->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, $colnum);
+    }
+
+
+    /**
+     * 获取DataSet下一行的指定列的值。
+     *
+     * 注意：似乎 fetchColumn() 返回的都是字符串类型的值，而不是预期的在数据库中定义的 int/float 等类型。
+     * 估计他们的初衷是考虑到数据库的变量类型和PHP的变量类型转换有差异，所以把这个转换留给开发者自行处理。
+     * 因此，如果需要返回特定类型的值，需要指定 $returnType 参数。
+     *
+     * @param int|string $column  列序号或列名
+     * @param string $returnType   返回的类型，可为 int/float
+     */
+    public function getValue($column = 0, $returnType = null)
     {
         // 列号
         $colnum = $this->getColumnNumber($column);
@@ -229,12 +256,20 @@ class DataSet
 
         // fetchColumn
         $v = $this->pdoStatement->fetchColumn($colnum);
-        if ($v === false) {
-            return false;
+
+        // 如果为空，返回null
+        if (is_null($v)) {
+            return null;
         }
 
-        // 返回类型化的值
-        return $this->getTypedValue($v, $this->columnMetas[$colnum]['native_type']);
+        switch ($returnType) {
+            case 'int':
+                return (is_numeric($v)) ? intval($v) : false;
+            case 'float':
+                return (is_numeric($v)) ? floatval($v) : false;
+            default:
+                return $v;
+        }
     }
 
 
@@ -276,36 +311,5 @@ class DataSet
 
         // 非法
         return false;
-    }
-
-
-    /**
-     * 根据 $native_type的不同，返回不同类型的值。
-     *
-     * @param mixed $value
-     * @param string $native_type
-     * @return mixed
-     */
-    protected function getTypedValue($value, $native_type)
-    {
-        // 如果是 null，直接返回 null
-        if (is_null($value)) {
-            return null;
-        }
-
-        // 返回不同类型的值
-        switch ($native_type) {
-            case 'INT':
-            case 'INTEGER':
-            case 'LONG':
-            case 'LONGLONG':
-                return intval($value);
-            case 'FLOAT':
-            case 'DOUBLE':
-            case 'DECIMAL':
-                return floatval($value);
-            default:
-                return $value;
-        }
     }
 }

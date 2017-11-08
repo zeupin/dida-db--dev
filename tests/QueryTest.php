@@ -407,7 +407,7 @@ EOT;
         $result = $t->select()->getRows();
         var_dump($result);
 
-        $result = $t->count()->getValue();
+        $result = $t->count()->getValue(0,'int');
         var_dump($result);
     }
 }
