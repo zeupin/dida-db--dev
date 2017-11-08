@@ -24,7 +24,7 @@ class MysqlDb extends \Dida\Db\Db
         $this->cfg['db.driver'] = 'Mysql';
 
         // 配置 Connection
-        $conn = new \Dida\Db\Connection($this);
+        $conn = new \Dida\Db\Connection($this->getConfig());
         $this->connection = &$conn;
 
         // 配置 SchemaInfo，使用 MysqlSchemaInfo
