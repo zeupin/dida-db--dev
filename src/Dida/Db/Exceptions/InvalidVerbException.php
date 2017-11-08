@@ -7,14 +7,13 @@
 namespace Dida\Db\Exceptions;
 
 /**
- * InvalidVerbBuilderException
+ * InvalidVerbException，指定了无效的verb。
+ *
+ * 原因是：
+ * 1. Query 中没有指定 verb。
+ * 2. verb 写错了。
+ * 3. 配置的 Builder 尚不能处理这个 verb。
  */
-class InvalidVerbBuilderException extends \Exception
+class InvalidVerbException extends \Exception
 {
-    public function __construct($message = "", $code = 0, \Throwable $previous = null)
-    {
-        $s = sprintf('[Builder] Invalid verb "%s"', $message);
-
-        parent::__construct($s, $code, $previous);
-    }
 }

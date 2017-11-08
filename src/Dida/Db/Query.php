@@ -175,7 +175,7 @@ class Query
         // 获取 Builder 对象
         $builder = $this->db->getBuilder();
         if ($builder === null) {
-            throw new Exception('Builder实例未指定');
+            throw new \Dida\Db\Exceptions\InvalidBuilderException;
         }
 
         // 如果指定了verb，把verb转为大写

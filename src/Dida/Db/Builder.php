@@ -173,7 +173,7 @@ class Builder
             case 'TRUNCATE':
                 return $this->build_TRUNCATE();
             default:
-                throw new Exceptions\InvalidVerbBuilderException($this->tasklist['verb']);
+                throw new \Dida\Db\Exceptions\InvalidVerbException($this->tasklist['verb']);
         }
     }
 
