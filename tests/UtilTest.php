@@ -8,7 +8,7 @@ use \Dida\Debug\Debug;
  */
 class UtilTest extends TestCase
 {
-    public function test_arrayBy()
+    public function test_arrayAssocBy()
     {
         $array = [
             ['c1' => 'A', 'c2' => 'a', 'c3' => 1, 'c4' => 11],
@@ -17,7 +17,7 @@ class UtilTest extends TestCase
             ['c1' => 'B', 'c2' => 'c', 'c3' => 4, 'c4' => 14],
         ];
 
-        $ret = \Dida\Db\Util::arrayBy($array, 'c1', 'c2');
+        $ret = \Dida\Db\Util::arrayAssocBy($array, 'c1', 'c2');
         echo Debug::varDump($ret);
 
         $expect = [

@@ -184,88 +184,49 @@ class DataSet
      *
      * @return array(array)|false
      */
-    public function getRows($key = null)
+    public function getRows()
+    {
+        $array = $this->pdoStatement->fetchAll();
+        return $array;
+    }
+
+
+    /**
+     * 获取键值化的 Rows。
+     *
+     * 注意：
+     * 需要自行保证给出的 $col1,$col2,$colN 的组合可以唯一确定一条记录。
+     * 否则，对于同一 $col1,$col2,$colN，后值将覆盖前值。
+     *
+     * @param string|int|array $colN    需要分组的列名，可用多个字段进行分组
+     *
+     */
+    public function getRowsAssocBy($colN)
     {
         $array = $this->pdoStatement->fetchAll();
 
-        // 简单的返回所有行
-        if (is_null($key)) {
-            return $array;
+        if (is_array($colN)) {
+            return Util::arrayAssocBy($array, $colN);
+        } else {
+            return Util::arrayAssocBy($array, func_get_args());
         }
-
-        // 加上索引字段
-        $keys = array_column($array, $key);
-        return array_combine($keys, $array);
     }
 
 
     /**
      * 获取分组化的Rows
      *
-     * @param mixed $col    需要分组的列名，可用多个字段进行分组
+     * @param string|int|array $colN    需要分组的列名，可用多个字段进行分组
      */
-    public function getGroupRows($col)
+    public function getRowsGroupBy($colN)
     {
         $array = $this->pdoStatement->fetchAll();
-        if (!$array) {
-            return $array;
+
+        if (is_array($colN)) {
+            return Util::arrayGroupBy($array, $colN);
+        } else {
+            return Util::arrayGroupBy($array, func_get_args());
         }
-
-        $return = [];
-        $args = func_get_args();
-
-        while ($row = array_shift($array)) {
-            $cur = &$return;
-
-            foreach ($args as $arg) {
-                $key = $row[$arg];
-                if (!array_key_exists($key, $cur)) {
-                    $cur[$key] = [];
-                }
-                $cur = &$cur[$key];
-                unset($row[$arg]);
-            }
-
-            $cur[] = $row;
-        }
-
-        return $return;
-    }
-
-
-    /**
-     * 获取键值化的 Rows。
-     * 需要自行保证给出的 $key 的组合可以唯一确定一条记录，类似复合主键
-     *
-     * @param mixed $key   需要分组的key列名，可用多个key字段组成一个复合主键来进行分组。
-     *
-     */
-    public function getGroupRowsByKeys($key)
-    {
-        $array = $this->pdoStatement->fetchAll();
-        if (!$array) {
-            return $array;
-        }
-
-        $return = [];
-        $args = func_get_args();
-
-        while ($row = array_shift($array)) {
-            $cur = &$return;
-
-            foreach ($args as $arg) {
-                $key = $row[$arg];
-                if (!array_key_exists($key, $cur)) {
-                    $cur[$key] = [];
-                }
-                $cur = &$cur[$key];
-                unset($row[$arg]);
-            }
-
-            $cur = $row;  // 就这个地方和 getGroupRows() 不同
-        }
-
-        return $return;
     }
 
 

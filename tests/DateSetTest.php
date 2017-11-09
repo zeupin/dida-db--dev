@@ -165,17 +165,17 @@ class DateSetTest extends TestCase
     }
 
 
-    public function test_getGroupRows()
+    public function test_getRowsGroupBy()
     {
         $this->initData();
-        $result = $this->dataset->getGroupRows('id');
+        $result = $this->dataset->getRowsGroupBy('id');
 
         // 看看结果
         echo Debug::varDump(__METHOD__, $result);
     }
 
 
-    public function test_getGroupRows2()
+    public function test_getRowsGroupBy2()
     {
         $sqlColumns = <<<'EOT'
 SELECT
@@ -210,7 +210,7 @@ EOT;
         ]);
         $dataset = new DataSet($stmt);
 
-        $result = $dataset->getGroupRows('TABLE_NAME', 'COLUMN_NAME');
+        $result = $dataset->getRowsGroupBy('TABLE_NAME', 'COLUMN_NAME');
         echo Debug::varDump(__METHOD__, $result);
 
         $stmt = $this->conn->getPDO()->prepare($sqlColumns);
@@ -220,7 +220,7 @@ EOT;
         ]);
         $dataset = new DataSet($stmt);
 
-        $result = $dataset->getGroupRowsByKeys('TABLE_NAME', 'COLUMN_NAME');
+        $result = $dataset->getRowsAssocBy('TABLE_NAME', 'COLUMN_NAME');
         echo Debug::varDump(__METHOD__, $result);
     }
 }
