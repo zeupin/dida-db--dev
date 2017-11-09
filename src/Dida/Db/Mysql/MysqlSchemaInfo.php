@@ -11,7 +11,7 @@ use \Dida\Db\SchemaInfo;
 /**
  * MysqlSchemaInfo
  */
-class MysqlSchemaInfo extends \Dida\Db\SchemaInfo\SchemaInfoFileCache
+class MysqlSchemaInfo extends \Dida\Db\SchemaInfo\File
 {
     use MysqlSchemaInfoTrait;
 

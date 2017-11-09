@@ -9,10 +9,11 @@ namespace Dida\Db\SchemaInfo;
 use \Exception;
 
 /**
- * SchemaInfoFileCache
+ * File
+ *
  * 基于文件缓存的 SchemaInfo 实现方式
  */
-abstract class SchemaInfoFileCache extends \Dida\Db\SchemaInfo
+abstract class File extends \Dida\Db\SchemaInfo
 {
     /**
      * 设置缓存目录
