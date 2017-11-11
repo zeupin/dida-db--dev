@@ -311,7 +311,7 @@ class DataSet
      *
      * @return array|false 成功返回数组，失败返回false。
      */
-    public function getColumnUniques($column)
+    public function getColumnDistinct($column)
     {
         // 列号
         $colnum = $this->getColumnNumber($column);
