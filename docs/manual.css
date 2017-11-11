@@ -1,10 +1,10 @@
 * { font-family: 'Source Code Pro', 'Microsoft Yahei'; line-height: 2; }
 
-h1 { font-size: 2rem; margin: 0; }
+h1 { font-size: 2rem; margin: 0; padding: 0; line-height: 1; }
 
-h2 { font-size: 1.5rem; margin: 0; }
+h2 { font-size: 1.5rem; margin: 1rem 0; line-height: 1.2; }
 
-h3 { font-size: 1.25rem; margin: 0 0 0 3rem; }
+h3 { font-size: 1rem; margin: 0 0 0 1rem; }
 
 h4 { font-size: 1rem; }
 
@@ -26,11 +26,16 @@ table.stripped tr:nth-child(odd) { background-color: #f0f0f0; }
 
 table.def th { font-weight: bold; text-align: left; }
 
-div.declare { padding-left: 6rem; padding-bottom: 1rem; }
-div.declare * { font-size: 0.8rem; }
-div.declare .func { font-size: 1.2em; font-weight: bold; }
-div.declare .param { color: #ec3e31; }
-div.declare .type { color: #010193; }
-div.declare table { font-size: 0.8rem; margin: 0; border-collapse: collapse; }
-div.declare th { border: solid 1px #eee; }
-div.declare td { border: solid 1px #eee; }
+.prototype { margin: 0 0 0 2rem; padding: 0; font-size: 0.8rem; line-height: 1; }
+
+.name { font-size: 1.2em; font-weight: bold; }
+
+.param { color: #ec3e31; word-wrap: none; }
+
+.type { color: #010193; word-wrap: none; }
+
+.funcdesc { margin: 0 0 0 2rem; font-size: 0.8rem; }
+
+.paramtable { margin-left: 2rem; border-collapse: collapse; }
+.paramtable th { font-size: 0.8rem; border: solid 1px #eee; }
+.paramtable td { font-size: 0.8rem; line-height: 1.4; border: solid 1px #eee; }

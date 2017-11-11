@@ -7,7 +7,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" href="manual.css">
-  <title>Db</title>
+  <title>DataSet</title>
 </head>
 
 <body>
@@ -15,30 +15,21 @@
   <h1>DataSet</h1>
   <h2>系统相关</h2>
   <h3>__construction() --构造函数。</h3>
-  <div class="declare">
-    <p>public function
-      <span class="func">__construction</span>(
-      <span class="param">$pdoStatement</span>)</p>
-    <table>
-      <tr>
-        <th>参数</th>
-        <th>类型</th>
-        <th>说明</th>
-      </tr>
-      <tr>
-        <td>
-          <span class="param">$pdoStatement</span>
-        </td>
-        <td>
-          <span class="type">\PDOStatement</span>
-        </td>
-        <td>设置要操作的PDOStatement对象。即PDO执行SELECT操作后，成功返回的PDOStatement。</td>
-      </tr>
-    </table>
-  </div>
+  <p class="prototype">public function <span class="name">__construction</span>(<span class="type">\PDOStatement</span> <span class="param">$pdoStatement</span>)</p>
+  <table class="paramtable">
+    <tr>
+      <th>参数</th>
+      <th>类型</th>
+      <th>说明</th>
+    </tr>
+    <tr>
+      <td class="param">$pdoStatement</td>
+      <td class="type">\PDOStatement</td>
+      <td>传入要操作的PDOStatement对象，此对象必须刚刚成功执行了一个SELECT类型的操作。</td>
+    </tr>
+  </table>
 
-
-  <h2>和PDOStatement相关的方法</h2>
+  <h2>PDOStatement相关的方法</h2>
   <h3>columnCount() --返回结果的列数。</h3>
   <h3>rowCount() --返回结果的行数。</h3>
   <h3>debugDumpParams() --打印一条 SQL 预处理命令。</h3>
@@ -48,8 +39,11 @@
   <h3>fetch() --从结果集中获取下一行。</h3>
   <h3>fetchAll() --从结果集中获取剩余所有行。</h3>
   <h3>fetchColumn() --从结果集中的下一行返回单独的一列。</h3>
-  <p>&nbsp;</p>
+  <h2>扩展的高级方法</h2>
   <h3>getColumnNumber()&nbsp; --获取指定列的列序号。</h3>
+  <p class="funcdesc">因为有些PDO调用需要使用列序号作为操作对象，而不是列名，所以用这个方法来将列名转为列序号。</p>
+  <p class="prototype">public function <span class="name">getColumnNumber</span>(<span class="type">string</span> <span class="param">$column</span>)</p>
+  <p class="prototype">public function <span class="name">getColumnNumber</span>(<span class="type">int</span> <span class="param">$column</span>)</p>
   <h3>getRow() --获取下一行。</h3>
   <h3>getRows() --获取剩余所有行。</h3>
   <h3>getColumn() --获取单独一列。</h3>
