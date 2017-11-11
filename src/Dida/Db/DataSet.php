@@ -203,7 +203,7 @@ class DataSet
      */
     public function getRowsAssocBy($colN)
     {
-        $array = $this->pdoStatement->fetchAll();
+        $array = $this->pdoStatement->fetchAll(PDO::FETCH_ASSOC);
 
         if (is_array($colN)) {
             return Util::arrayAssocBy($array, $colN);
@@ -220,7 +220,7 @@ class DataSet
      */
     public function getRowsGroupBy($colN)
     {
-        $array = $this->pdoStatement->fetchAll();
+        $array = $this->pdoStatement->fetchAll(PDO::FETCH_ASSOC);
 
         if (is_array($colN)) {
             return Util::arrayGroupBy($array, $colN);
