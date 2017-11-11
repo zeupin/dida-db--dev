@@ -45,8 +45,29 @@
   <p class="prototype">public function <span class="name">getColumnNumber</span>(<span class="type">string</span> <span class="param">$column</span>)</p>
   <p class="prototype">public function <span class="name">getColumnNumber</span>(<span class="type">int</span> <span class="param">$column</span>)</p>
   <h3>getRow() --获取下一行。</h3>
+  <p class="prototype">public function <span class="name">getRow</span>()</p>
   <h3>getRows() --获取剩余所有行。</h3>
+  <p class="prototype">public function <span class="name">getRows</span>()</p>
   <h3>getColumn() --获取单独一列。</h3>
+  <p class="prototype">public function <span class="name">getColumn</span>(<span class="type">string|int</span> <span class="param">$column,</span> <span class="type">string|int</span> <span class="param">
+  $key = null</span>)</p>
+    <table class="paramtable">
+    <tr>
+      <th>参数</th>
+      <th>类型</th>
+      <th>说明</th>
+    </tr>
+    <tr>
+      <td class="param">$<span class="param">column</span></td>
+      <td class="type">string|int</td>
+      <td>选择用哪一列作为value。可为列名或者列序号，其中第一列序号是0。</td>
+    </tr>
+    <tr>
+      <td class="param">$key</td>
+      <td class="type">string|int</td>
+      <td>选择用哪一列作为key。可为列名或者列序号，其中第一列序号是0。</td>
+    </tr>
+  </table>
   <h3>getColumnDistinct() --获取指定列的无重复值。</h3>
   <h3>getRowsAssocBy() --获取所有列，按照指定的列名进行关联。</h3>
   <h3>getRowsGroupBy() --获取所有列，按照指定的列名进行分组。</h3>
