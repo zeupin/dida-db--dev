@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="manual.css">
+  <title>Db</title>
+</head>
+
+<body>
+
+  <h1>DataSet</h1>
+  <h2>系统相关</h2>
+  <h3>__construction() --构造函数。</h3>
+  <div class="declare">
+    <p>public function
+      <span class="func">__construction</span>(
+      <span class="param">$pdoStatement</span>)</p>
+    <table>
+      <tr>
+        <th>参数</th>
+        <th>类型</th>
+        <th>说明</th>
+      </tr>
+      <tr>
+        <td>
+          <span class="param">$pdoStatement</span>
+        </td>
+        <td>
+          <span class="type">\PDOStatement</span>
+        </td>
+        <td>设置要操作的PDOStatement对象。即PDO执行SELECT操作后，成功返回的PDOStatement。</td>
+      </tr>
+    </table>
+  </div>
+
+
+  <h2>和PDOStatement相关的方法</h2>
+  <h3>columnCount() --返回结果的列数。</h3>
+  <h3>rowCount() --返回结果的行数。</h3>
+  <h3>debugDumpParams() --打印一条 SQL 预处理命令。</h3>
+  <h3>errorCode() --获取跟上一次语句句柄操作相关的 SQLSTATE。</h3>
+  <h3>errorInfo() --获取跟上一次语句句柄操作相关的扩展错误信息。</h3>
+  <h3>setFetchMode() --为语句设置默认的获取模式。</h3>
+  <h3>fetch() --从结果集中获取下一行。</h3>
+  <h3>fetchAll() --从结果集中获取剩余所有行。</h3>
+  <h3>fetchColumn() --从结果集中的下一行返回单独的一列。</h3>
+  <p>&nbsp;</p>
+  <h3>getColumnNumber()&nbsp; --获取指定列的列序号。</h3>
+  <h3>getRow() --获取下一行。</h3>
+  <h3>getRows() --获取剩余所有行。</h3>
+  <h3>getColumn() --获取单独一列。</h3>
+  <h3>getColumnUniques() --获取指定列的无重复值。</h3>
+  <h3>getRowsAssocBy() --获取所有列，按照指定的列名进行关联。</h3>
+  <h3>getRowsGroupBy() --获取所有列，按照指定的列名进行分组。</h3>
+  <h3>getValue() --获取指定列的值。</h3>
+
+</body>
+
+</html>
