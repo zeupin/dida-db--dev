@@ -69,7 +69,7 @@ public function count(array $columns = null, $alias = null)
 ## Wheres
 
 ### where()  --设置一个where条件。
-在 whereTree 的当前节点添加一个 where 条件
+在 whereTree 的当前节点添加一个 where 条件。其中，支持的条件操作符列表请见本文附录一。
 
 ```php
 【标准模式】
@@ -127,7 +127,7 @@ public function whereGoto($name)
 ## Havings
 
 ### having()  --设置一个having条件。
-在 havingTree 的当前节点添加一个 having 条件
+在 havingTree 的当前节点添加一个 having 条件。其中，支持的条件操作符列表请见本文附录一。
 
 ```php
 【标准模式】
@@ -364,4 +364,67 @@ public function backupTaskList()
 
 ```php
 public function restoreTaskList(array $data)
+```
+
+## 附录
+
+### 附录一：支持的条件操作符列表
+
+```php
+/**
+ * 支持的操作符集合
+ * [操作符 => 内部名称]
+ */
+public static $opertor_set = [
+    /* Raw SQL */
+    'RAW' => 'RAW',
+
+    /* 等于 */
+    'EQ' => 'EQ',
+    '='  => 'EQ',
+    '==' => 'EQ',
+
+    /* 不等于 */
+    'NEQ' => 'NEQ',
+    '<>'  => 'NEQ',
+    '!='  => 'NEQ',
+
+    /* <,>,<=,>= */
+    'GT'  => 'GT',
+    '>'   => 'GT',
+    'EGT' => 'EGT',
+    '>='  => 'EGT',
+    'LT'  => 'LT',
+    '<'   => 'LT',
+    'ELT' => 'ELT',
+    '<='  => 'ELT',
+
+    /* LIKE */
+    'LIKE'     => 'LIKE',
+    'NOT LIKE' => 'NOTLIKE',
+    'NOTLIKE'  => 'NOTLIKE',
+
+    /* IN */
+    'IN'     => 'IN',
+    'NOT IN' => 'NOTIN',
+    'NOTIN'  => 'NOTIN',
+
+    /* BETWEEN */
+    'BETWEEN'     => 'BETWEEN',
+    'NOT BETWEEN' => 'NOTBETWEEN',
+    'NOTBETWEEN'  => 'NOTBETWEEN',
+
+    /* EXISTS */
+    'EXISTS'     => 'EXISTS',
+    'NOT EXISTS' => 'NOTEXISTS',
+    'NOTEXISTS'  => 'NOTEXISTS',
+
+    /* ISNULL */
+    'ISNULL'      => 'ISNULL',
+    'NULL'        => 'ISNULL',
+    'ISNOTNULL'   => 'ISNOTNULL',
+    'IS NOT NULL' => 'ISNOTNULL',
+    'NOTNULL'     => 'ISNOTNULL',
+    'NOT NULL'    => 'ISNOTNULL',
+];
 ```
