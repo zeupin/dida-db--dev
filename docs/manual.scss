@@ -1,6 +1,5 @@
 * {
   font-family: 'Source Code Pro', 'Microsoft Yahei';
-  line-height: 2;
 }
 
 h1 {
@@ -12,27 +11,35 @@ h1 {
 
 h2 {
   font-size: 1.5rem;
-  margin: 1rem 0;
+  margin: 3rem 0 1rem 0;
   line-height: 1.2;
 }
 
 h3 {
   font-size: 1rem;
-  margin: 0.5em 0 0 1rem;
+  line-height: 1.2;
+  margin: 1em 0;
 }
 
 h4 {
-  font-size: 1rem;
+  font-size: 0.8rem;
+  line-height: 2;
+  margin: 0 0 0 2rem;
+  padding: 0;
 }
 
 h5 {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: bold;
+  line-height: 1;
+  margin: 1rem 0;
 }
 
 h6 {
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: bold;
+  line-height: 1;
+  margin: 0.5rem 0;
 }
 
 .code,
@@ -61,11 +68,21 @@ a {
 }
 
 table {
-  th,
-  td {
+  margin-left: 2rem;
+  border-collapse: collapse;
+  empty-cells: show;
+  line-height: 2;
+
+  th, td {
+    font-size: 0.8rem;
     vertical-align: top;
-    padding-left: 1em;
-    padding-right: 1em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    border: solid 1px #eee;
+  }
+
+  th {
+    text-align: center;
   }
 }
 
@@ -90,35 +107,24 @@ table.def {
 }
 
 .name {
-  font-size: 1.2em;
   font-weight: bold;
 }
 
 .param {
   color: #ec3e31;
-  word-wrap: none;
+}
+td.param {
+  text-align: center;
 }
 
-.type {
+.vartype {
   color: #010193;
-  word-wrap: none;
+}
+td.vartype {
+  text-align: center;
 }
 
-.funcdesc {
-  margin: 0 0 0 2rem;
+.description {
+  margin: 0;
   font-size: 0.8rem;
-}
-
-.paramtable {
-  margin-left: 2rem;
-  border-collapse: collapse;
-  th {
-    font-size: 0.8rem;
-    border: solid 1px #eee;
-  }
-  td {
-    font-size: 0.8rem;
-    line-height: 1.4;
-    border: solid 1px #eee;
-  }
 }
