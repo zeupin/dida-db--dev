@@ -37,13 +37,13 @@ composer update
 
 | 类名 | 说明
 |---|---
-| [Dida\Db\Db](Db.md)                  | 数据库
-| [Dida\Db\Connection](Connection.md)  | 负责数据库的物理连接
-| [Dida\Db\DataSet](DataSet.md) 	   | 查询结果的数据集
-| [Dida\Db\Query](Query.md) 	       | 负责管理查询请求
-| [Dida\Db\Builder](Builder.md) 	   | 查询构造器，负责把查询请求编译成对应的SQL表达式
-| [Dida\Db\SchemaInfo](SchemaInfo.md)  | 实现Schema的查询处理
-| [Dida\Db\Util](Util.md) 	           | 工具类
+| [Dida\Db\Db](Db.md)                  | 入口主类，作为数据库容器，负责对应的数据库功能实现。
+| [Dida\Db\Connection](Connection.md)  | 负责和数据库进行物理连接，并管理相应的PDO对象。
+| [Dida\Db\DataSet](DataSet.md) 	   | 对查询类结果集的各种处理。
+| [Dida\Db\Query](Query.md) 	       | 负责根据客户意图，给出想要的结果。
+| [Dida\Db\Builder](Builder.md) 	   | 负责将给出的tasklist编译成对应的SQL表达式和参数数组。
+| [Dida\Db\SchemaInfo](SchemaInfo.md)  | 负责读取数据库和数据表的元信息，供Query和Builder使用。
+| [Dida\Db\Util](Util.md) 	           | 一些实用工具的集合。
 
 ## 几种典型的配置文件
 
