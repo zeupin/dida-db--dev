@@ -98,9 +98,6 @@ abstract class SchemaInfo
     }
 
 
-
-
-
     /**
      * 列出<schema>中的所有表名
      *
@@ -108,12 +105,14 @@ abstract class SchemaInfo
      */
     abstract public function getTableList();
 
+
     /**
      * 获取<schema.table>的所有信息。
      *
      * @return array|false  有错返回false，成功返回array
      */
     abstract public function getTable($table);
+
 
     /**
      * 获取<schema.table>的表元信息。
