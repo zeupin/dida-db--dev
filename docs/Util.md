@@ -51,6 +51,3 @@ public static function arrayGroupBy(array &$array, $keyN)
 **注意：**
 
 1. 考虑到处理超大数组时的内存占用问题，**原数组的数据被逐条处理后，会被删除**。
-2. 需要自行保证给出的 key1,key2,keyN 的组合可以唯一确定一条记录。<br>否则，对于同一 key1,key2,keyN，后值将覆盖前值。
-3. key1,key2,keyN 一般使用数据表的唯一主键、复合主键、或者有唯一值的字段名。
-
