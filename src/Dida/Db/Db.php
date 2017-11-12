@@ -83,6 +83,14 @@ class Db
             }
         }
 
+        // 如果没有指定默认的fetchmode，则将其设置为FETCH_ASSOC
+        if (!array_key_exists('db.options', $this->cfg)) {
+            $this->cfg['db.options'] = [];
+        }
+        if (!array_key_exists(\PDO::ATTR_DEFAULT_FETCH_MODE, $this->cfg['db.options'])) {
+            $this->cfg['db.options'][\PDO::ATTR_DEFAULT_FETCH_MODE] = \PDO::FETCH_ASSOC;
+        }
+
         return $this;
     }
 
