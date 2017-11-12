@@ -61,7 +61,7 @@ class Connection
 
 
     /**
-     * 连接数据库
+     * 连接数据库。
      *
      * @return boolean 成功返回true，失败返回false
      */
@@ -85,7 +85,7 @@ class Connection
 
 
     /**
-     * 断开数据库连接
+     * 断开数据库连接。
      *
      * @return void
      */
@@ -132,7 +132,7 @@ class Connection
 
 
     /**
-     * 立即连接数据库，并返回PDO实例
+     * 立即连接数据库，并返回PDO实例。
      *
      * @return \PDO|false
      */
@@ -193,7 +193,7 @@ class Connection
 
 
     /**
-     * 执行一条通用SQL语句。
+     * 执行一条通用SQL语句,返回true/false。
      *
      * @param string $statement 表达式
      * @param array $parameters 参数数组
@@ -221,7 +221,7 @@ class Connection
 
 
     /**
-     * 执行一条查询类的语句（SELECT），返回数组形式的结果。
+     * 执行一条查询类的语句（SELECT），返回一个DataSet。
      *
      * @param string $statement
      * @param array $parameters 参数数组

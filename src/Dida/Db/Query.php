@@ -144,7 +144,7 @@ class Query
 
 
     /**
-     * 只保留 taskbase 里面的条目和 table 条目,其它条目全部删除
+     * 只保留 taskbase 里面的 table 条目,其它条目全部删除
      */
     public function clear()
     {
@@ -1434,21 +1434,8 @@ class Query
     }
 
 
-    private function _________________________UTILITIES()
+    private function _________________________BACKUP_AND_RESTORE()
     {
-    }
-
-
-    /**
-     * 如果检查到 tasklist 中的某个数组类型的键不存在，就先创建一个。
-     *
-     * @param type $name
-     */
-    protected function initArrayItem($name)
-    {
-        if (!isset($this->tasklist[$name])) {
-            $this->tasklist[$name] = [];
-        }
     }
 
 
@@ -1495,6 +1482,24 @@ class Query
         } else {
             $this->havingDict = [];
             $this->havingActive = null;
+        }
+    }
+
+
+    private function _________________________UTILITIES()
+    {
+    }
+
+
+    /**
+     * 如果检查到 tasklist 中的某个数组类型的键不存在，就先创建一个。
+     *
+     * @param type $name
+     */
+    protected function initArrayItem($name)
+    {
+        if (!isset($this->tasklist[$name])) {
+            $this->tasklist[$name] = [];
         }
     }
 
