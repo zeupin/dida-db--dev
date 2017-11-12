@@ -1,4 +1,4 @@
-# Common PDO Driver Examples
+# 典型数据库配置
 
 [TOC]
 
@@ -8,9 +8,9 @@
 
 ```php
 [
-    'dsn'      => 'mysql:host=localhost;port=3306;dbname=db_name',
-    'username' => 'db_username',
-    'password' => 'db_password',
+    'dsn'      => 'mysql:host=localhost;port=3306;dbname=数据库名',
+    'username' => '数据库用户名',
+    'password' => '数据库用户密码',
     'options'  => [
         PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
