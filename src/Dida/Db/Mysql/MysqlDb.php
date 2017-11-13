@@ -15,6 +15,11 @@ namespace Dida\Db\Mysql;
 class MysqlDb extends \Dida\Db\Db
 {
     /**
+     * 版本号
+     */
+    const VERSION = '20171113';
+
+    /**
      * Class construct.
      *
      * @param array $cfg

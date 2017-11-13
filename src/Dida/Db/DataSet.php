@@ -19,7 +19,7 @@ class DataSet
     /**
      * Version
      */
-    const VERSION = '0.1.5';
+    const VERSION = '20171113';
 
     /**
      * 存储的PDOStatement实例。

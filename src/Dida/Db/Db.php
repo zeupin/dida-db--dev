@@ -17,7 +17,7 @@ class Db
     /**
      * 版本号
      */
-    const VERSION = '0.1.5';
+    const VERSION = '20171113';
 
     /**
      * @var \Dida\Db\Connection

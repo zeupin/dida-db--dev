@@ -19,6 +19,11 @@ use \Exception;
 abstract class File extends \Dida\Db\SchemaInfo
 {
     /**
+     * Version
+     */
+    const VERSION = '20171113';
+
+    /**
      * 设置缓存目录
      *
      * @var string

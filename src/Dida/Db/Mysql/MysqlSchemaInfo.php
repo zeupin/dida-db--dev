@@ -16,6 +16,11 @@ use \Dida\Db\SchemaInfo;
  */
 class MysqlSchemaInfo extends \Dida\Db\SchemaInfo\File
 {
+    /**
+     * 版本号
+     */
+    const VERSION = '20171113';
+
     use MysqlSchemaInfoTrait;
 
 

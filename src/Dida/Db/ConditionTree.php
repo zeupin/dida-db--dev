@@ -15,6 +15,11 @@ namespace Dida\Db;
 class ConditionTree
 {
     /**
+     * 版本号
+     */
+    const VERSION = '20171113';
+
+    /**
      * 名字
      *
      * @var string

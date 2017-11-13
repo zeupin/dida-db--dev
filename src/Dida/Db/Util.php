@@ -15,6 +15,11 @@ namespace Dida\Db;
 class Util
 {
     /**
+     * 版本号
+     */
+    const VERSION = '20171113';
+
+    /**
      * 将一个数组按照给出的 key1,key2,keyN 进行键值化，返回处理后的数组。
      *
      * 注意：

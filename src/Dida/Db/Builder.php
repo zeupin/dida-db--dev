@@ -18,6 +18,11 @@ use \Exception;
 class Builder
 {
     /**
+     * 版本号
+     */
+    const VERSION = '20171113';
+
+    /**
      * 指向 Db 连接的指针
      *
      * @var \Dida\Db\Db

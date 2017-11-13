@@ -18,6 +18,11 @@ use \Exception;
 class Connection
 {
     /**
+     * 版本号
+     */
+    const VERSION = '20171113';
+
+    /**
      * @var \Dida\Db\Db
      */
     protected $db = null;

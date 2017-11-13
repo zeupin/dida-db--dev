@@ -17,9 +17,9 @@ use \Exception;
 class Query
 {
     /**
-     * Version
+     * 版本号
      */
-    const VERSION = '0.1.5';
+    const VERSION = '20171113';
 
     /*
      * 单条插入后的返回类型
