@@ -1,7 +1,8 @@
 <?php
 /**
- * Dida Framework --Powered by Zeupin LLC
- * http://dida.zeupin.com
+ * Dida Framework  <http://dida.zeupin.com>
+ *
+ * Copyright 2017 Zeupin LLC.
  */
 
 namespace Dida\Db\Exceptions;
