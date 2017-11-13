@@ -181,8 +181,6 @@ class Db
     /**
      * 创建一个新的Query实例对象。
      *
-     * 针对不同的数据库，应该重写对应的逻辑，覆盖掉本方法。
-     *
      * @return Query
      */
     protected function newQuery()
@@ -194,7 +192,7 @@ class Db
 
 
     /**
-     * 创建一个新的Query实例对象，然后设置主表
+     * 创建一个新的Query对象，然后将其设置为主表。
      *
      * @param string $table
      * @param string $prefix
