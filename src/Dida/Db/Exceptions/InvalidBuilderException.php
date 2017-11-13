@@ -1,8 +1,10 @@
 <?php
 /**
- * Dida Framework  <http://dida.zeupin.com>
+ * Dida Framework  -- A Rapid Development Framework
+ * Copyright (c) Zeupin LLC. (http://zeupin.com)
  *
- * Copyright 2017 Zeupin LLC.
+ * Licensed under The MIT License
+ * Redistributions of files must retain the above copyright notice.
  */
 
 namespace Dida\Db\Exceptions;
