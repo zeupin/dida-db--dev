@@ -31,9 +31,9 @@ composer require dida/db
 composer update
 ```
 
-## API文档
+## 项目文档
 
-* [API](docs/README.md)
+* <https://github.com/zeupin/dida-db/wiki>
 
 ## 作者
 
