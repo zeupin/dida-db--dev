@@ -6,9 +6,7 @@ copy /y  composer.json  "%TARGET_DIR%\"
 copy /y  .gitignore     "%TARGET_DIR%\"
 
 del /f /s /q            "%TARGET_DIR%\src\*.*"
+rd /s /q                "%TARGET_DIR%\src\"
 xcopy /y /s  src        "%TARGET_DIR%\src\"
 
-del /f /s /q            "%TARGET_DIR%\docs\*.*"
-xcopy /y /s  docs       "%TARGET_DIR%\docs\"
-
-pause
+ping -n 15 127.0.0.1>nul
