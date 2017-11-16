@@ -43,6 +43,10 @@ composer update
 
 * [宙品科技，Zeupin LLC](http://zeupin.com) , 尤其是 [Dida 框架团队](http://dida.zeupin.com)
 
-## 版权协议
+## 版权声明
 
-Copyright (c) 2017 Zeupin LLC. Released under the [MIT license](LICENSE)。
+版权所有 (c) 2017 上海宙品信息科技有限公司。<br>Copyright (c) 2017 Zeupin LLC. <http://zeupin.com>
+
+源代码采用MIT授权协议。<br>Licensed under The MIT License.
+
+如需在项目中使用，必须保留源代码中的完整版权声明。<br>Redistributions of files MUST retain the above copyright notice.
