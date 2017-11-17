@@ -1,7 +1,10 @@
 <?php
 /**
- * Dida Framework --Powered by Zeupin LLC
- * http://dida.zeupin.com
+ * Dida Framework  -- A Rapid Development Framework
+ * Copyright (c) Zeupin LLC. (http://zeupin.com)
+ *
+ * Licensed under The MIT License.
+ * Redistributions of files MUST retain the above copyright notice.
  */
 require('D:/Projects/github/dida-autoloader--dev/src/Dida/Autoloader.php');
 \Dida\Autoloader::init();
