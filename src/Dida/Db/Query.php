@@ -19,7 +19,7 @@ class Query
     /**
      * 版本号
      */
-    const VERSION = '20171113';
+    const VERSION = '20171127';
 
     /*
      * 单条插入后的返回类型
@@ -1055,7 +1055,7 @@ class Query
      * SELECT
      *
      * @param string|array $columnlist
-     * 
+     *
      * @return \Dida\Db\DataSet
      */
     public function select($columnlist = null)

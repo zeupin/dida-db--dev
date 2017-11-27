@@ -21,7 +21,7 @@ abstract class File extends \Dida\Db\SchemaInfo
     /**
      * Version
      */
-    const VERSION = '20171113';
+    const VERSION = '20171127';
 
     /**
      * 设置缓存目录
@@ -84,7 +84,21 @@ abstract class File extends \Dida\Db\SchemaInfo
     }
 
 
-    public function &getTable($table)
+    /**
+     * 从info表中获取表的所有信息。
+     *
+     * @param string $table
+     *
+     * @return array|boolean
+     * [
+     *     'pri'        => 唯一主键的键名,
+     *     'pris'       => [复合主键的列名数组],
+     *     'unis'       => [unique约束的列名数组],
+     *     'columnlist' => [列名数组]
+     *     'columns'    => [列元数组],
+     * ]
+     */
+    public function getTable($table)
     {
         // 不存在这个表，返回false
         if (!$this->tableExists($table)) {
