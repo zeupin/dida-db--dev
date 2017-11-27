@@ -1056,7 +1056,7 @@ class Query
      *
      * @param string|array $columnlist
      *
-     * @return \Dida\Db\DataSet|false 成功，返回一个DataSet；失败，返回false。
+     * @return \Dida\Db\DataSet|false 执行成功，返回一个DataSet；失败，返回false。
      */
     public function select($columnlist = null)
     {
