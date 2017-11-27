@@ -244,6 +244,7 @@ class Connection
             $statement = $this->replacePrefix($statement);
         }
 
+        // 检查执行是否成功（仅指执行期间有无错误发生，即使匹配的记录为0条，只要执行没有出错，结果就为true）。
         $result = $this->execute($statement, $parameters);
 
         if ($result) {
