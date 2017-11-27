@@ -1054,6 +1054,8 @@ class Query
     /**
      * SELECT
      *
+     * @param string|array $columnlist
+     * 
      * @return \Dida\Db\DataSet
      */
     public function select($columnlist = null)
