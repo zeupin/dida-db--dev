@@ -11,7 +11,7 @@ namespace Dida\Db;
 
 /**
  * ConnectionPool
- * 
+ *
  * 连接池，提供读写分离特性。
  */
 class ConnectionPool
