@@ -1079,6 +1079,86 @@ class Query
 
 
     /**
+     * 获取第一条匹配记录。
+     *
+     * @param string|array $columnlist
+     *
+     * @return array|false 执行成功，返回匹配的第一条记录；失败或者没有匹配记录，返回false。
+     */
+    public function getFirst($columnlist = null)
+    {
+        // 数据
+        if (!is_null($columnlist)) {
+            $this->columnlist($columnlist);
+        }
+
+        // 准备连接
+        $conn = $this->db->getConnection();
+
+        // 执行
+        $this->tasklist['verb'] = 'SELECT';
+        $sql = $this->build();
+        $dataset = $conn->executeRead($sql['statement'], $sql['parameters']);
+
+        // 如果执行出错，返回false
+        if ($dataset) {
+            return false;
+        }
+
+        // 从dataset中取出数据
+        $row = $dataset->fetch();
+
+        // 如果没有数据，返回false
+        if (!$row) {
+            return false;
+        }
+
+        // 否则返回第一行
+        return $row;
+    }
+
+
+    /**
+     * 获取所有匹配的记录。
+     *
+     * @param string|array $columnlist
+     *
+     * @return array|false 执行成功，返回匹配的所有记录；失败或者没有匹配记录，返回false。
+     */
+    public function getAll($columnlist = null)
+    {
+        // 数据
+        if (!is_null($columnlist)) {
+            $this->columnlist($columnlist);
+        }
+
+        // 准备连接
+        $conn = $this->db->getConnection();
+
+        // 执行
+        $this->tasklist['verb'] = 'SELECT';
+        $sql = $this->build();
+        $dataset = $conn->executeRead($sql['statement'], $sql['parameters']);
+
+        // 如果执行出错，返回false
+        if ($dataset) {
+            return false;
+        }
+
+        // 从dataset中取出数据
+        $rows = $dataset->fetchAll();
+
+        // 如果没有数据，返回false
+        if (!$rows) {
+            return false;
+        }
+
+        // 否则返回匹配的所有记录
+        return $rows;
+    }
+
+
+    /**
      * 插入一条记录。
      *
      * @param array $record
