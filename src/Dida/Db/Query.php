@@ -1101,7 +1101,7 @@ class Query
         $dataset = $conn->executeRead($sql['statement'], $sql['parameters']);
 
         // 如果执行出错，返回false
-        if ($dataset) {
+        if (!$dataset) {
             return false;
         }
 
@@ -1141,7 +1141,7 @@ class Query
         $dataset = $conn->executeRead($sql['statement'], $sql['parameters']);
 
         // 如果执行出错，返回false
-        if ($dataset) {
+        if (!$dataset) {
             return false;
         }
 
