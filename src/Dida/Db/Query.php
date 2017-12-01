@@ -1085,36 +1085,18 @@ class Query
      *
      * @return array|false 执行成功，返回匹配的第一条记录；失败或者没有匹配记录，返回false。
      */
-    public function getFirst($columnlist = null)
+    public function getRow($columnlist = null)
     {
-        // 数据
-        if (!is_null($columnlist)) {
-            $this->columnlist($columnlist);
-        }
-
-        // 准备连接
-        $conn = $this->db->getConnection();
-
-        // 执行
-        $this->tasklist['verb'] = 'SELECT';
-        $sql = $this->build();
-        $dataset = $conn->executeRead($sql['statement'], $sql['parameters']);
+        // 执行select动作
+        $dataset = $this->select($columnlist);
 
         // 如果执行出错，返回false
         if (!$dataset) {
             return false;
         }
 
-        // 从dataset中取出数据
-        $row = $dataset->fetch();
-
-        // 如果没有数据，返回false
-        if (!$row) {
-            return false;
-        }
-
-        // 否则返回第一行
-        return $row;
+        // 返回结果
+        return $dataset->getRow();
     }
 
 
@@ -1125,20 +1107,10 @@ class Query
      *
      * @return array|false 执行成功，返回匹配的所有记录；失败或者没有匹配记录，返回false。
      */
-    public function getAll($columnlist = null)
+    public function getRows($columnlist = null)
     {
-        // 数据
-        if (!is_null($columnlist)) {
-            $this->columnlist($columnlist);
-        }
-
-        // 准备连接
-        $conn = $this->db->getConnection();
-
-        // 执行
-        $this->tasklist['verb'] = 'SELECT';
-        $sql = $this->build();
-        $dataset = $conn->executeRead($sql['statement'], $sql['parameters']);
+        // 执行select动作
+        $dataset = $this->select($columnlist);
 
         // 如果执行出错，返回false
         if (!$dataset) {
@@ -1146,15 +1118,29 @@ class Query
         }
 
         // 从dataset中取出数据
-        $rows = $dataset->fetchAll();
+        return $dataset->getRows();
+    }
 
-        // 如果没有数据，返回false
-        if (!$rows) {
+
+    /**
+     * 从结果集的第一行返回对应列的值。
+     *
+     * @param type $column
+     * @param type $returnType
+     * @return boolean
+     */
+    public function getValue($column = 0, $returnType = null)
+    {
+        // 执行select动作
+        $dataset = $this->select($columnlist);
+
+        // 如果执行出错，返回false
+        if (!$dataset) {
             return false;
         }
 
-        // 否则返回匹配的所有记录
-        return $rows;
+        // 返回
+        return $dataset->getValue($column, $returnType);
     }
 
 
