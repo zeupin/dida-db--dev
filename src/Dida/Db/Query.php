@@ -1132,7 +1132,7 @@ class Query
     public function getValue($column = 0, $returnType = null)
     {
         // 执行select动作
-        $dataset = $this->select($columnlist);
+        $dataset = $this->select();
 
         // 如果执行出错，返回false
         if (!$dataset) {
