@@ -1105,7 +1105,7 @@ class Query
      *
      * @param string|array $columnlist
      *
-     * @return array|false 执行成功，返回匹配的所有记录；失败或者没有匹配记录，返回false。
+     * @return array|false 执行成功，返回匹配的所有记录；没有匹配记录，返回[]；有错返回false。
      */
     public function getRows($columnlist = null)
     {
