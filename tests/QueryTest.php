@@ -18,7 +18,6 @@ class QueryTest extends TestCase
      * @var \Dida\Db\Connection
      */
     public $conn = null;
-
     protected $ALL_COLUMN_NAMES = 'id, code, name, price, modified_at';
 
 
@@ -49,6 +48,7 @@ class QueryTest extends TestCase
         $query = $this->db->table('test')->build('select');
         print_r($query);
     }
+
 
     public function test_ConditionTree()
     {
@@ -139,8 +139,8 @@ EOT;
 
         $t = $this->db->table('test');
 
-        $result1 = $t->getColumn(2);
-        $result2 = $t->getColumn('name');
+        $result1 = $t->doGetColumn(2);  // getColumn实际是DataSet的方法
+        $result2 = $t->doGetColumn('name');
 
         // 期望$result1=$result2
         $this->assertEquals($result1, $result2);
@@ -154,11 +154,11 @@ EOT;
     {
         $this->resetMock(__DIR__ . '/zp_test_truncate.sql');
 
-        // user是个空表
+        // user 是个空表
         $t = $this->db->table('test');
 
-        $result1 = $t->getColumn(2);
-        $result2 = $t->getColumn('name');
+        $result1 = $t->doGetColumn(2);
+        $result2 = $t->doGetColumn('name');
 
         // 期望$result1=$result2
         $this->assertEquals($result1, $result2);
@@ -242,7 +242,7 @@ DELETE FROM zp_test
 EOT;
         $this->assertEquals($expected, $result['statement']);
 
-        $result = $t->delete();
+        $result = $t->doDelete();
         $this->assertEquals(2, $result);
     }
 
@@ -262,8 +262,8 @@ TRUNCATE TABLE zp_test
 EOT;
         $this->assertEquals($expected, $result['statement']);
 
-        $result = $t->delete();
-        $this->assertEquals(2, $result);
+        $result = $t->doTruncate();
+        $this->assertEquals(0, $result);
     }
 
 
@@ -281,15 +281,15 @@ EOT;
         print_r($result);
 
         // 插入一条记录
-        $result = $t->insertOne(['code' => uniqid(), 'name' => '香蕉', 'price' => 5.2,]);
+        $result = $t->doInsertOne(['code' => uniqid(), 'name' => '香蕉', 'price' => 5.2,]);
         $this->assertEquals(1, $result);
 
         // 插入一条记录，返回id
-        $result = $t->insertOne(['code' => uniqid(), 'name' => '香蕉', 'price' => 5.3,], Query::INSERT_RETURN_ID);
+        $result = $t->doInsertOne(['code' => uniqid(), 'name' => '香蕉', 'price' => 5.3,], Query::INSERT_RETURN_ID);
         $this->assertEquals(4, $result);
 
         // 插入多条记录
-        $result = $t->insertMany([
+        $result = $t->doInsertMany([
             ['code' => 'a1', 'name' => '柚子', 'price' => 5.1,],
             ['code' => 'a1', 'name' => '柚子', 'price' => 5.2,], // 测试code重复
             ['code' => 'a3', 'name' => '柚子', 'price' => 5.3,],
@@ -297,7 +297,7 @@ EOT;
         $this->assertEquals(2, $result);
 
         // insertMany
-        $result = $t->insertMany([
+        $result = $t->doInsertMany([
             ['code' => uniqid(), 'name' => '葡萄', 'price' => 8.1,],
             ['code' => uniqid(), 'name' => '葡萄', 'price' => 8.2,],
             ['code' => uniqid(), 'name' => '葡萄', 'price' => 8.3,],
@@ -305,7 +305,7 @@ EOT;
         $this->assertEquals(3, $result);
 
         // insertMany 的成功清单
-        $result = $t->insertMany([
+        $result = $t->doInsertMany([
             ['code' => uniqid(), 'name' => '枇杷', 'price' => 8.1,],
             ['code' => uniqid(), 'name' => '枇杷', 'price' => 8.2,],
             ['code' => uniqid(), 'name' => '枇杷', 'price' => 8.3,],
@@ -313,7 +313,7 @@ EOT;
         print_r($result);
 
         // insertMany 的错误清单
-        $result = $t->insertMany([
+        $result = $t->doInsertMany([
             ['code' => 'apple', 'name' => '菠萝', 'price' => 8.1,], // 应该执行失败
             ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.2,],
             ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.3,],
@@ -321,7 +321,7 @@ EOT;
         print_r($result);
 
         // insertMany 的错误详细报告
-        $result = $t->insertMany([
+        $result = $t->doInsertMany([
             ['code' => 'apple', 'name' => '菠萝', 'price' => 8.1,], // 应该执行失败
             ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.2,],
             ['code' => uniqid(), 'name' => '菠萝', 'price' => 8.3,],
@@ -339,7 +339,7 @@ EOT;
         $t = $this->db->table('test');
 
         // 插入多条记录
-        $result = $t->insertMany([
+        $result = $t->doInsertMany([
             ['id' => 101, 'code' => 'a1', 'name' => '柚子', 'price' => 5.1,],
             ['id' => 102, 'code' => 'a2', 'name' => '柚子', 'price' => 5.2,],
             ['id' => 103, 'code' => 'a3', 'name' => '柚子', 'price' => 5.3,],
@@ -347,13 +347,13 @@ EOT;
 
         // insertOrUpdateOne
         $t = $this->db->table('test');
-        $result = $t->insertOrUpdateOne(
+        $result = $t->doInsertOrUpdateOne(
             ['id' => 104, 'code' => 'a4', 'name' => '柚子', 'price' => 5.4,], 'id');
         $this->assertTrue($result);
 
         // insertOrUpdateOne 失败
         $t = $this->db->table('test');
-        $result = $t->insertOrUpdateOne(
+        $result = $t->doInsertOrUpdateOne(
             ['id' => 105, 'code' => 'a4', 'name' => '柚子', 'price' => 5.4,], 'id'); //code冲突
         $this->assertFalse($result);
 
@@ -365,7 +365,7 @@ EOT;
             ['id' => 203, 'code' => '203', 'name' => '西瓜', 'price' => 9.3,],
             ['id' => 101, 'code' => 'a1', 'name' => '柚子', 'price' => 10.1,],
         ];
-        $result = $t->insertOrUpdateMany($records, 'id');
+        $result = $t->doInsertOrUpdateMany($records, 'id');
         print_r($result);
 
         // many
@@ -376,7 +376,7 @@ EOT;
             ['id' => 203, 'code' => '203', 'name' => '桂圆', 'price' => 7.3,],
             ['id' => 204, 'code' => '204', 'name' => '桂圆', 'price' => 7.4,],
         ];
-        $result = $t->insertOrUpdateMany($records, 'id');
+        $result = $t->doInsertOrUpdateMany($records, 'id');
         print_r($result);
         $this->assertEmpty($result['fail']);
 
@@ -388,7 +388,7 @@ EOT;
             ['id' => 303, 'code' => '203', 'name' => '301', 'price' => 7.3,],
             ['id' => 304, 'code' => '304', 'name' => '301', 'price' => 7.4,],
         ];
-        $result = $t->insertOrUpdateMany($records, 'id');
+        $result = $t->doInsertOrUpdateMany($records, 'id');
         print_r($result);
         $this->assertEquals([3 => null], $result['succ']);
     }
@@ -400,14 +400,16 @@ EOT;
 
         $t = $this->db->table('test');
 
-        $t->insertOne(
+        $t->doInsertOne(
             ['id' => 401, 'code' => '401', 'name' => '401', 'price' => null,]
-            );
+        );
 
+        $t = $this->db->table('test');
         $result = $t->doSelect()->getRows();
         var_dump($result);
 
-        $result = $t->count()->getValue(0, 'int');
+        $t = $this->db->table('test');
+        $result = $t->doCount();
         var_dump($result);
     }
 }

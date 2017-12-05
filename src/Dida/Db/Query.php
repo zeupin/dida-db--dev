@@ -19,7 +19,7 @@ class Query
     /**
      * 版本号
      */
-    const VERSION = '20171127';
+    const VERSION = '20171205';
 
     /*
      * 单条插入后的返回类型
@@ -239,12 +239,12 @@ class Query
     /**
      * SELECT COUNT(...)
      *
-     * @param array $columns
+     * @param string|array $columns
      * @param string $alias
      *
      * @return $this
      */
-    public function count(array $columns = null, $alias = null)
+    public function count($columns = null, $alias = null)
     {
         $this->initArrayItem('columnlist');
 
@@ -1157,6 +1157,43 @@ class Query
 
 
     /**
+     * 执行count。
+     *
+     * @param string|array $columns
+     * @param string $alias
+     *
+     * @return int|false   成功返回count，有错返回false。
+     */
+    public function doCount($columns = null, $alias = null)
+    {
+        if ($columns) {
+            // 如果指定了字段，就只统计这些字段
+            $this->tasklist['columnlist'] = [];
+            $this->tasklist['columnlist'][] = ['count', $columns, $alias];
+        } else {
+            // 标准的count子句
+            $this->count(null, null);
+        }
+
+        // 准备连接
+        $conn = $this->db->getConnection();
+
+        // 执行
+        $this->tasklist['verb'] = 'SELECT';
+        $sql = $this->build();
+        $dataset = $conn->executeRead($sql['statement'], $sql['parameters']);
+
+        // 如果执行有错，返回false
+        if (!$dataset) {
+            return false;
+        }
+
+        // 否则返回第一列
+        return $dataset->getValue(0, 'int');
+    }
+
+
+    /**
      * UPDATE
      *
      * @return int|false 成功，返回影响条数；失败，返回false。
@@ -1336,7 +1373,7 @@ class Query
      *    self::INSERT_MANY_RETURN_FAIL_LIST     执行失败的列表
      *    self::INSERT_MANY_RETURN_FAIL_REPORT   执行失败的报告
      */
-    public function doInsertMany(array $records, $returnType = self::INSERT_RETURN_COUNT)
+    public function doInsertMany(array $records, $returnType = self::INSERT_MANY_RETURN_SUCC_COUNT)
     {
         // 空数组，无需插入
         if (empty($records)) {
