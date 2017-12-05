@@ -108,7 +108,7 @@ class QueryTest extends TestCase
         $this->resetMock(__DIR__ . '/zp_test.sql');
 
         $query = $this->db->table('test', 'zp_');
-        $result = $query->select(["count(*)"])->getRow();
+        $result = $query->doSelect(["count(*)"])->getRow();
         print_r($result);
     }
 
@@ -202,7 +202,7 @@ FROM
 EOT;
         $this->assertEquals($expected, $result['statement']);
 
-        $result = $t->select()->getRows();
+        $result = $t->doSelect()->getRows();
         print_r($result);
     }
 
@@ -404,7 +404,7 @@ EOT;
             ['id' => 401, 'code' => '401', 'name' => '401', 'price' => null,]
             );
 
-        $result = $t->select()->getRows();
+        $result = $t->doSelect()->getRows();
         var_dump($result);
 
         $result = $t->count()->getValue(0, 'int');

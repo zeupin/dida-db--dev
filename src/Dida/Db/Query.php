@@ -24,21 +24,21 @@ class Query
     /*
      * 单条插入后的返回类型
      */
-    const INSERT_RETURN_COUNT = 1;  // 返回成功的条数
-    const INSERT_RETURN_ID = 2;  // 返回 lastInsertId
+    const INSERT_RETURN_COUNT = 'count';    // 返回成功的条数
+    const INSERT_RETURN_ID = 'id';          // 返回 lastInsertId
 
     /*
      * 多条插入成功后的返回类型
      */
-    const INSERT_MANY_RETURN_SUCC_COUNT = 1;    // 返回成功的条数
-    const INSERT_MANY_RETURN_SUCC_LIST = 2;     // 返回成功的序号列表，[seq => last_insert_id]
+    const INSERT_MANY_RETURN_SUCC_COUNT = 'succ_count';     // 返回成功的条数
+    const INSERT_MANY_RETURN_SUCC_LIST = 'succ_list';      // 返回成功的序号列表，[seq => last_insert_id]
 
     /*
      * 多条插入失败后的返回类型
      */
-    const INSERT_MANY_RETURN_FAIL_COUNT = -1;    // 返回成功的条数
-    const INSERT_MANY_RETURN_FAIL_LIST = -2;     // 返回失败的序号列表，[seq => errorCode]
-    const INSERT_MANY_RETURN_FAIL_REPORT = -3;   // 返回失败的报告 [id => [errorCode, errorInfo]]
+    const INSERT_MANY_RETURN_FAIL_COUNT = 'fail_count';     // 返回成功的条数
+    const INSERT_MANY_RETURN_FAIL_LIST = 'fail_list';       // 返回失败的序号列表，[seq => errorCode]
+    const INSERT_MANY_RETURN_FAIL_REPORT = 'fail_report';   // 返回失败的报告 [id => [errorCode, errorInfo]]
 
     /**
      * @var \Dida\Db\Db
@@ -155,41 +155,6 @@ class Query
         $this->table($table['name'], $table['prefix']);
 
         return $this;
-    }
-
-
-    private function _________________________BUILD()
-    {
-    }
-
-
-    /**
-     * build查询所需的SQL语句
-     *
-     * @return
-     *      @@array
-     *      [
-     *          'statement'  => ...,
-     *          'parameters' => ...,
-     *      ]
-     */
-    public function build($verb = null)
-    {
-        // 获取 Builder 对象
-        $builder = $this->db->getBuilder();
-        if ($builder === null) {
-            throw new \Dida\Db\Exceptions\InvalidBuilderException;
-        }
-
-        // 如果指定了verb，把verb转为大写
-        if (is_string($verb)) {
-            $verb = trim($verb);
-            $verb = strtoupper($verb);
-            $this->tasklist['verb'] = $verb;
-        }
-
-        // build
-        return $builder->build($this->tasklist);
     }
 
 
@@ -1046,8 +1011,38 @@ class Query
     }
 
 
-    private function _________________________EXECUTIONS()
+    private function _________________________BUILD()
     {
+    }
+
+
+    /**
+     * build查询所需的SQL语句
+     *
+     * @return
+     *      @@array
+     *      [
+     *          'statement'  => ...,
+     *          'parameters' => ...,
+     *      ]
+     */
+    public function build($verb = null)
+    {
+        // 获取 Builder 对象
+        $builder = $this->db->getBuilder();
+        if ($builder === null) {
+            throw new \Dida\Db\Exceptions\InvalidBuilderException;
+        }
+
+        // 如果指定了verb，把verb转为大写
+        if (is_string($verb)) {
+            $verb = trim($verb);
+            $verb = strtoupper($verb);
+            $this->tasklist['verb'] = $verb;
+        }
+
+        // build
+        return $builder->build($this->tasklist);
     }
 
 
@@ -1056,9 +1051,92 @@ class Query
      *
      * @param string|array $columnlist
      *
-     * @return \Dida\Db\DataSet|false 执行成功，返回一个DataSet；失败，返回false。
+     * @return $this
      */
     public function select($columnlist = null)
+    {
+        // 数据
+        if (!is_null($columnlist)) {
+            $this->columnlist($columnlist);
+        }
+
+        // 动作
+        $this->tasklist['verb'] = 'SELECT';
+
+        // 返回
+        return c;
+    }
+
+
+    /**
+     * INSERT
+     *
+     * @return $this
+     */
+    public function insert()
+    {
+        // 动作
+        $this->tasklist['verb'] = 'INSERT';
+
+        // 返回
+        return $this;
+    }
+
+
+    /**
+     * UPDATE
+     *
+     * @return $this
+     */
+    public function update()
+    {
+        // 动作
+        $this->tasklist['verb'] = 'UPDATE';
+
+        // 返回
+        return $this;
+    }
+
+
+    /**
+     * DELETE
+     *
+     * @return $this
+     */
+    public function delete()
+    {
+        // 动作
+        $this->tasklist['verb'] = 'DELETE';
+
+        // 返回
+        return $this;
+    }
+
+
+    /**
+     * TRUNCATE
+     *
+     * @return $this
+     */
+    public function truncate()
+    {
+        // 动作
+        $this->tasklist['verb'] = 'TRUNCATE';
+
+        // 返回
+        return $this;
+    }
+
+
+    private function _________________________EXECUTIONS()
+    {
+    }
+
+
+    /**
+     * 执行select动作
+     */
+    public function doSelect($columnlist = null)
     {
         // 数据
         if (!is_null($columnlist)) {
@@ -1079,16 +1157,70 @@ class Query
 
 
     /**
+     * UPDATE
+     *
+     * @return int|false 成功，返回影响条数；失败，返回false。
+     */
+    public function doUpdate()
+    {
+        // 准备连接
+        $conn = $this->db->getConnection();
+
+        // 执行
+        $this->tasklist['verb'] = 'UDATE';
+        $sql = $this->build();
+        $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
+        return $rowsAffected;
+    }
+
+
+    /**
+     * 执行DELETE。
+     *
+     * @return int|false    返回影响的行数，失败返回false。
+     */
+    public function doDelete()
+    {
+        // 准备连接
+        $conn = $this->db->getConnection();
+
+        // 执行
+        $this->tasklist['verb'] = 'DELETE';
+        $sql = $this->build();
+        $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
+        return $rowsAffected;
+    }
+
+
+    /**
+     * TRUNCATE
+     *
+     * @return int|false   成功返回影响的行数，失败返回false。
+     */
+    public function doTruncate()
+    {
+        // 准备连接
+        $conn = $this->db->getConnection();
+
+        // 执行
+        $this->tasklist['verb'] = 'TRUNCATE';
+        $sql = $this->build();
+        $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
+        return $rowsAffected;
+    }
+
+
+    /**
      * 获取第一条匹配记录。
      *
      * @param string|array $columnlist
      *
      * @return array|false 执行成功，返回匹配的第一条记录；失败或者没有匹配记录，返回false。
      */
-    public function getRow($columnlist = null)
+    public function doGetRow($columnlist = null)
     {
         // 执行select动作
-        $dataset = $this->select($columnlist);
+        $dataset = $this->doSelect($columnlist);
 
         // 如果执行出错，返回false
         if (!$dataset) {
@@ -1107,10 +1239,10 @@ class Query
      *
      * @return array|false 执行成功，返回匹配的所有记录；没有匹配记录，返回[]；有错返回false。
      */
-    public function getRows($columnlist = null)
+    public function doGetRows($columnlist = null)
     {
         // 执行select动作
-        $dataset = $this->select($columnlist);
+        $dataset = $this->doSelect($columnlist);
 
         // 如果执行出错，返回false
         if (!$dataset) {
@@ -1129,10 +1261,10 @@ class Query
      * @param type $returnType
      * @return boolean
      */
-    public function getValue($column = 0, $returnType = null)
+    public function doGetValue($column = 0, $returnType = null)
     {
         // 执行select动作
-        $dataset = $this->select();
+        $dataset = $this->doSelect();
 
         // 如果执行出错，返回false
         if (!$dataset) {
@@ -1152,7 +1284,7 @@ class Query
      *     INSERT_RETURN_COUNT  返回受影响的行数
      *     INSERT_RETURN_ID     返回插入的id
      */
-    public function insertOne(array $record, $insertReturn = self::INSERT_RETURN_COUNT)
+    public function doInsertOne(array $record, $insertReturn = self::INSERT_RETURN_COUNT)
     {
         // 空数组，无需插入
         if (empty($record)) {
@@ -1204,7 +1336,7 @@ class Query
      *    self::INSERT_MANY_RETURN_FAIL_LIST     执行失败的列表
      *    self::INSERT_MANY_RETURN_FAIL_REPORT   执行失败的报告
      */
-    public function insertMany(array $records, $returnType = self::INSERT_RETURN_COUNT)
+    public function doInsertMany(array $records, $returnType = self::INSERT_RETURN_COUNT)
     {
         // 空数组，无需插入
         if (empty($records)) {
@@ -1315,24 +1447,6 @@ class Query
 
 
     /**
-     * UPDATE
-     *
-     * @return int|false 成功，返回影响条数；失败，返回false。
-     */
-    public function update()
-    {
-        // 准备连接
-        $conn = $this->db->getConnection();
-
-        $sql = $this->build('UPDATE');
-
-        $result = $conn->executeWrite($sql['statement'], $sql['parameters']);
-
-        return $result;
-    }
-
-
-    /**
      * 主键不存在就插入，主键已存在就更新。
      *
      * @param array $data
@@ -1340,7 +1454,7 @@ class Query
      *
      * @return boolean  成功返回true，失败返回false
      */
-    public function insertOrUpdateOne(array $record, $pri_col)
+    public function doInsertOrUpdateOne(array $record, $pri_col)
     {
         // 重置 Query
         $this->clear();
@@ -1387,7 +1501,7 @@ class Query
      *     'fail' => [], // 执行失败的序号列表
      * ]
      */
-    public function insertOrUpdateMany(array $records, $pri_col)
+    public function doInsertOrUpdateMany(array $records, $pri_col)
     {
         $succ = [];
         $fail = [];
@@ -1440,46 +1554,10 @@ class Query
 
 
     /**
-     * DELETE
-     *
-     * @return $this
-     */
-    public function delete()
-    {
-        // 准备连接
-        $conn = $this->db->getConnection();
-
-        // 执行
-        $this->tasklist['verb'] = 'DELETE';
-        $sql = $this->build();
-        $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
-        return $rowsAffected;
-    }
-
-
-    /**
-     * TRUNCATE
-     *
-     * @return $this
-     */
-    public function truncate()
-    {
-        // 准备连接
-        $conn = $this->db->getConnection();
-
-        // 执行
-        $this->tasklist['verb'] = 'TRUNCATE';
-        $sql = $this->build();
-        $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
-        return $rowsAffected;
-    }
-
-
-    /**
      * 尝试执行未定义的方法。
      *
      * 虽然不倾向使用__call()，但是考虑到方便性，还是暂时保留。
-     * 最好用 overload 或者 Trait 等方式明确定义。
+     * 最好用 类继承 或者 Trait 等方式明确定义。
      *
      * @param string $name
      * @param array $arguments
@@ -1488,16 +1566,22 @@ class Query
      */
     public function __call($name, $arguments)
     {
-        // 如果是 DataSet 支持的方法
-        if (method_exists('\Dida\Db\DataSet', $name)) {
-            switch ($name) {
-                case 'not support':
-                    // 如果不想支持某些方法，在这里加上若干 case 去除。
-                    break;
-                default:
-                    // 默认支持DataSet所有方法。
-                    $dataset = $this->select();
-                    return call_user_func_array([$dataset, $name], $arguments);
+        // 只有以do开头的，才尝试执行自动匹配
+        if (substr($name, 0, 2) === 'do') {
+            $action = substr($name, 2);
+            $action = lcfirst($action);
+
+            // 如果是 DataSet 支持的方法
+            if (method_exists('\Dida\Db\DataSet', $action)) {
+                switch ($action) {
+                    case 'not support':
+                        // 如果不想支持某些方法，在这里加上若干 case 去除。
+                        break;
+                    default:
+                        // 默认支持DataSet所有方法。
+                        $dataset = $this->doSelect();
+                        return call_user_func_array([$dataset, $action], $arguments);
+                }
             }
         }
 

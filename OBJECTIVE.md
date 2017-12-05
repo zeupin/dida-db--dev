@@ -424,7 +424,7 @@ $admin = $db->table('admin', 'a')
         'company' => 'zeupin',
     ])
     ->where('valid = 1')
-    ->select()
+    ->doSelect()
     ->build();
 echo $admin->statement . PHP_EOL;
 echo var_export($admin->parameters, true) . PHP_EOL;
