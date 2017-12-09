@@ -393,6 +393,10 @@ class Query
      * 在当前 whereTree 节点处新增一个子树节点。
      *
      * @param array $conditions
+     * [
+     *     [字段表达式, 运算符, 数据],
+     *     [字段表达式, 运算符, 数据],
+     * ]
      * @param string $logic
      * @param string $name
      *
@@ -403,7 +407,7 @@ class Query
         // 初始化 [where]
         $this->initWhere();
 
-        // 检查命名有无重复
+        // 检查命名$name有无重复
         if (is_string($name)) {
             if (array_key_exists($name, $this->whereDict)) {
                 throw new Exception("重复定义 where 命名组");
@@ -1064,7 +1068,7 @@ class Query
         $this->tasklist['verb'] = 'SELECT';
 
         // 返回
-        return c;
+        return $this;
     }
 
 
