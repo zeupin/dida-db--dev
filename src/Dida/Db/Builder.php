@@ -831,6 +831,10 @@ class Builder
 
     protected function cond_LIKE($column, $op, $data)
     {
+        if (is_scalar($data)) {
+            $data = [$data];
+        }
+
         $part = [
             'statement'  => "($column $op ?)",
             'parameters' => $data,
