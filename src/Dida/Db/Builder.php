@@ -585,12 +585,15 @@ class Builder
         foreach ($joins as $join) {
             list($jointype, $table, $on, $parameters) = $join;
 
-            // 登记join进来的这个表
+            // 拆分为 table AS alias
             $table_alias = $this->util_split_name_alias($table);
+
+            // 登记join进来的这个表
             $this->util_register_table($table_alias['name'], $table_alias['alias']);
 
             // 生成标准形式的 $table
-            $table = $this->util_table_with_alias($table_alias['name'], $table_alias['alias']);
+            $tablename_with_prefix = $this->util_table_with_prefix($table_alias['name']);
+            $table = $this->util_table_with_alias($tablename_with_prefix, $table_alias['alias']);
 
             $st[] = "\n{$jointype} {$table}\n    ON $on";
             $pa[] = $parameters;
@@ -1185,7 +1188,7 @@ class Builder
      *
      * @return string
      */
-    protected function util_table_with_prefix($name, $prefix)
+    protected function util_table_with_prefix($name, $prefix = null)
     {
         if (!is_string($prefix)) {
             $prefix = $this->tasklist['prefix'];
@@ -1239,7 +1242,7 @@ class Builder
      * 别名存在时，返回“表名 AS 别名”。
      * 别名不存在时，只返回“表名”。
      *
-     * @param string $name
+     * @param string $table
      * @param string $alias
      *
      * @return string
