@@ -1495,7 +1495,7 @@ class Query
      *
      * @return boolean  成功返回true，失败返回false
      */
-    public function doInsertOrUpdateOne(array $record, $pri_col)
+    public function doInsertOrUpdateOne(array $record, $unique_col)
     {
         // 重置 Query
         $this->clear();
@@ -1503,29 +1503,39 @@ class Query
         // 获取连接
         $pdo = $this->db->getConnection()->getPDO();
 
-        // 插入本条记录
-        $sql = $this->record($record)->build('INSERT');
-        $stmt = $pdo->prepare($sql['statement']);
-        $result = $stmt->execute($sql['parameters']);
+        // 检查是否已经存在记录
+        $entry = $this->where($unique_col, '=' , $record[$unique_col])
+            ->select($unique_col)
+            ->doGetRow();
 
-        // 如果插入成功
-        if ($result) {
-            return true;
-        }
+        if ($entry) {
+            // 如果数据已经存在，则尝试更新
+            $this->clear();
+            $sql = $this->where($unique_col, '=', $record[$unique_col])
+                ->setValue($record)
+                ->build('UPDATE');
+            $stmt = $pdo->prepare($sql['statement']);
+            $result = $stmt->execute($sql['parameters']);
 
-        // 尝试更新
-        $this->clear();
-        $sql = $this->where($pri_col, '=', $record[$pri_col])
-            ->setValue($record)
-            ->build('UPDATE');
-        $stmt = $pdo->prepare($sql['statement']);
-        $result = $stmt->execute($sql['parameters']);
-
-        // 如果更新成功，返回true，否则返回false
-        if ($result && $stmt->rowCount()) {
-            return true;
+            // 如果更新成功，返回true，否则返回false
+            if ($result && $stmt->rowCount()) {
+                return true;
+            } else {
+                return false;
+            }
         } else {
-            return false;
+            // 如果数据不存在，则尝试插入
+            $this->clear();
+            $sql = $this->record($record)->build('INSERT');
+            $stmt = $pdo->prepare($sql['statement']);
+            $result = $stmt->execute($sql['parameters']);
+
+            // 如果插入成功
+            if ($result) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
