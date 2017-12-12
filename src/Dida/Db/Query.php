@@ -1208,7 +1208,7 @@ class Query
         $conn = $this->db->getConnection();
 
         // 执行
-        $this->tasklist['verb'] = 'UDATE';
+        $this->tasklist['verb'] = 'UPDATE';
         $sql = $this->build();
         $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
         return $rowsAffected;
