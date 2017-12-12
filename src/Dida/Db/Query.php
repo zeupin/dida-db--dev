@@ -1216,6 +1216,35 @@ class Query
 
 
     /**
+     * 按照关键列的值，去更新某条记录。
+     *
+     * @param array $record
+     * @param string $key_col
+     *
+     * @return int|false 成功，返回影响条数；失败，返回false。
+     */
+    public function doUpdateBy(array $record, $key_col)
+    {
+        // 如果要更新的记录中没有指定的关键列，直接返回false
+        if (!array_key_exists($key_col, $record)) {
+            return false;
+        }
+
+        // 准备sql语句
+        $this->clear();
+        $this->setValue($record);
+        $this->where($key_col, '=', $record[$key_col]);
+        $this->tasklist['verb'] = 'UPDATE';
+        $sql = $this->build();
+
+        // 准备连接
+        $conn = $this->db->getConnection();
+        $rowsAffected = $conn->executeWrite($sql['statement'], $sql['parameters']);
+        return $rowsAffected;
+    }
+
+
+    /**
      * 执行DELETE。
      *
      * @return int|false    返回影响的行数，失败返回false。
@@ -1504,7 +1533,7 @@ class Query
         $pdo = $this->db->getConnection()->getPDO();
 
         // 检查是否已经存在记录
-        $entry = $this->where($unique_col, '=' , $record[$unique_col])
+        $entry = $this->where($unique_col, '=', $record[$unique_col])
             ->select($unique_col)
             ->doGetRow();
 
