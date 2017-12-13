@@ -1358,7 +1358,7 @@ class Query
     {
         // 空数组，无需插入
         if (empty($record)) {
-            return 0;
+            return false;
         }
 
         // 不是关联数组
@@ -1391,7 +1391,29 @@ class Query
 
                 // 否则返回新生成的id
                 return $conn->getPDO()->lastInsertId();
+
+            // 其他情况，视同 INSERT_RETURN_COUNT
+            default:
+                return $rowsAffected;
         }
+    }
+
+
+    /**
+     * 插入一条记录，然后返回此条插入的记录。
+     *
+     * @param array $record
+     * @param int|string $id_col
+     *
+     * @return array|false   执行成功，返回插入的记录。执行期间有错，返回false
+     */
+    public function doInsertOneThenGet(array $record, $id_col)
+    {
+        $id = $this->doInsertOne($record, self::INSERT_RETURN_ID);
+
+        $this->clear();
+        $row = $this->where($id_col, '=', $id)->doGetRow();
+        return $row;
     }
 
 
