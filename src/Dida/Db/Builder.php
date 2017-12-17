@@ -982,7 +982,7 @@ class Builder
 
         // 生成 limit 子句
         $limit = $this->tasklist['limit'];
-        $this->ST['limit'] = "LIMIT $limit";
+        $this->ST['limit'] = "\nLIMIT $limit";
         return;
     }
 
