@@ -14,6 +14,11 @@ use \Exception;
 
 /**
  * Connection
+ *
+ * 注1. 在App中，必须确保连接是以静态变量（static）或者单例模式（singleton）提供服务，否则运行过程中
+ *      可能会抛出连接过多的异常。
+ *      对于简单程序，一般是在父Model中，提供一个函数内部的static对象。
+ *      对于大型程序，则用Container，注册一个单例连接服务。
  */
 class Connection
 {
@@ -217,7 +222,7 @@ class Connection
         }
 
         try {
-            $this->pdo = $this->getPDO();
+            $this->pdo = $this->getPDO(); // 注1
             $this->pdoStatement = $this->pdo->prepare($statement);
             $result = $this->pdoStatement->execute($parameters);
             return $result;
