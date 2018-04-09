@@ -495,14 +495,9 @@ class Builder
 
     protected function clause_COLUMNLIST()
     {
+        // 如果没有设置字段列表，则默认为 主表.*
         if (!$this->has('columnlist')) {
-            $columnlist = $this->localSchemaInfo[$this->mainTable['name']]['columnlist'];
-            if ($columnlist) {
-                $this->ST['columnlist'] = implode(', ', $columnlist);
-            } else {
-                $this->ST['columnlist'] = '*';
-            }
-
+            $this->ST['columnlist'] = "{$this->mainTable["name"]}.*";
             return;
         }
 
@@ -1337,23 +1332,23 @@ class Builder
      */
     protected function util_register_table($name, $alias, $prefix = null)
     {
-        // 实际的表名
-        $realname = $this->util_table_with_prefix($name, $prefix);
-
-        // 指向到 schemainfo 的对应节点处
-        $tableinfo = $this->db->getSchemaInfo()->getTable($realname);
-        if (!$tableinfo) {
-            throw new Exception("SchemaInfo中没有找到数据表{$realname}的相关信息");
-        }
-
-        // 指向到 schemainfo->info[表名]
-        $this->localSchemaInfo[$realname] = $tableinfo;
-
-        // 如果有别名，也指向到 schemainfo->info[表名]
-        if ($alias) {
-            if (!isset($this->localSchemaInfo[$alias])) {
-                $this->localSchemaInfo[$alias] = $tableinfo;
-            }
-        }
+//        // 实际的表名
+//        $realname = $this->util_table_with_prefix($name, $prefix);
+//
+//        // 指向到 schemainfo 的对应节点处
+//        $tableinfo = $this->db->getSchemaInfo()->getTable($realname);
+//        if (!$tableinfo) {
+//            throw new Exception("SchemaInfo中没有找到数据表{$realname}的相关信息");
+//        }
+//
+//        // 指向到 schemainfo->info[表名]
+//        $this->localSchemaInfo[$realname] = $tableinfo;
+//
+//        // 如果有别名，也指向到 schemainfo->info[表名]
+//        if ($alias) {
+//            if (!isset($this->localSchemaInfo[$alias])) {
+//                $this->localSchemaInfo[$alias] = $tableinfo;
+//            }
+//        }
     }
 }
